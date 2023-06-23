@@ -248,6 +248,7 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
   late double _height;
   late double _timeLineWidth;
   late double _hourHeight;
+  late double _lastScrollOffset;
   late DateTime _currentStartDate;
   late DateTime _currentEndDate;
   late DateTime _maxDate;
@@ -278,10 +279,6 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
 
   EventController<T>? _controller;
 
-  late ScrollController _scrollController;
-
-  ScrollController get scrollController => _scrollController;
-
   late List<WeekDays> _weekDays;
 
   final _scrollConfiguration = EventScrollConfiguration();
@@ -300,8 +297,7 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
     _regulateCurrentDate();
 
     _calculateHeights();
-    _scrollController =
-        ScrollController(initialScrollOffset: widget.scrollOffset);
+    _lastScrollOffset = widget.scrollOffset;
     _pageController = PageController(initialPage: _currentIndex);
     _eventArranger = widget.eventArranger ?? SideEventArranger<T>();
 
@@ -427,7 +423,8 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
                           showVerticalLine: true,
                           controller: controller,
                           hourHeight: _hourHeight,
-                          scrollController: _scrollController,
+                          scrollOffset: _lastScrollOffset,
+                          scrollListener: _scrollPageListener,
                           eventArranger: _eventArranger,
                           weekDays: _weekDays,
                           minuteSlotSize: widget.minuteSlotSize,
@@ -516,6 +513,10 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
   void _calculateHeights() {
     _hourHeight = widget.heightPerMinute * 60;
     _height = _hourHeight * Constants.hoursADay;
+  }
+
+  void _scrollPageListener(ScrollController controller) {
+    _lastScrollOffset = controller.offset;
   }
 
   void _assignBuilders() {
@@ -857,19 +858,6 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
       event: event,
       duration: duration ?? widget.pageTransitionDuration,
       curve: curve ?? widget.pageTransitionCurve,
-    );
-  }
-
-  /// Animate to specific scroll controller offset
-  void animateTo(
-    double offset, {
-    Duration duration = const Duration(milliseconds: 200),
-    Curve curve = Curves.linear,
-  }) {
-    _scrollController.animateTo(
-      offset,
-      duration: duration,
-      curve: curve,
     );
   }
 

@@ -247,6 +247,7 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
   late double _height;
   late double _timeLineWidth;
   late double _hourHeight;
+  late double _lastScrollOffset;
   late DateTime _currentDate;
   late DateTime _maxDate;
   late DateTime _minDate;
@@ -273,10 +274,6 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
 
   EventController<T>? _controller;
 
-  late ScrollController _scrollController;
-
-  ScrollController get scrollController => _scrollController;
-
   late VoidCallback _reloadCallback;
 
   final _scrollConfiguration = EventScrollConfiguration<T>();
@@ -293,8 +290,7 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
     _regulateCurrentDate();
 
     _calculateHeights();
-    _scrollController =
-        ScrollController(initialScrollOffset: widget.scrollOffset);
+    _lastScrollOffset = widget.scrollOffset;
     _pageController = PageController(initialPage: _currentIndex);
     _eventArranger = widget.eventArranger ?? SideEventArranger<T>();
     _assignBuilders();
@@ -415,7 +411,8 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
                           minuteSlotSize: widget.minuteSlotSize,
                           scrollNotifier: _scrollConfiguration,
                           fullDayEventBuilder: _fullDayEventBuilder,
-                          scrollController: _scrollController,
+                          scrollOffset: _lastScrollOffset,
+                          scrollListener: _scrollPageListener,
                           showHalfHours: widget.showHalfHours,
                           halfHourIndicatorSettings: _halfHourIndicatorSettings,
                         ),
@@ -491,6 +488,10 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
   void _calculateHeights() {
     _hourHeight = widget.heightPerMinute * 60;
     _height = _hourHeight * Constants.hoursADay;
+  }
+
+  void _scrollPageListener(ScrollController controller) {
+    _lastScrollOffset = controller.offset;
   }
 
   void _assignBuilders() {
@@ -773,19 +774,6 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
       event: event,
       duration: duration ?? widget.pageTransitionDuration,
       curve: curve ?? widget.pageTransitionCurve,
-    );
-  }
-
-  /// Animate to specific scroll controller offset
-  void animateTo(
-    double offset, {
-    Duration duration = const Duration(milliseconds: 200),
-    Curve curve = Curves.linear,
-  }) {
-    _scrollController.animateTo(
-      offset,
-      duration: duration,
-      curve: curve,
     );
   }
 
