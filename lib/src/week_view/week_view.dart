@@ -129,6 +129,8 @@ class WeekView<T extends Object?> extends StatefulWidget {
   /// Scroll offset of week view page.
   final double scrollOffset;
 
+  final void Function(double)? scrollListener;
+
   /// Called when user taps on event tile.
   final CellTapCallback<T>? onEventTap;
 
@@ -209,6 +211,7 @@ class WeekView<T extends Object?> extends StatefulWidget {
     this.weekNumberBuilder,
     this.backgroundColor = Colors.white,
     this.scrollOffset = 0.0,
+    this.scrollListener,
     this.onEventTap,
     this.onDateLongPress,
     this.onDateTap,
@@ -397,8 +400,9 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
                       return ValueListenableBuilder(
                         valueListenable: _scrollConfiguration,
                         builder: (_, __, ___) => InternalWeekViewPage<T>(
-                          key: ValueKey(
-                              _hourHeight.toString() + dates[0].toString()),
+                          key: ValueKey(_hourHeight.toString() +
+                              dates[0].toString() +
+                              _lastScrollOffset.toString()),
                           height: _height,
                           width: _width,
                           weekTitleWidth: _weekTitleWidth,
@@ -517,6 +521,9 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
 
   void _scrollPageListener(ScrollController controller) {
     _lastScrollOffset = controller.offset;
+    if (widget.scrollListener != null) {
+      widget.scrollListener!(controller.offset);
+    }
   }
 
   void _assignBuilders() {
@@ -859,6 +866,10 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
       duration: duration ?? widget.pageTransitionDuration,
       curve: curve ?? widget.pageTransitionCurve,
     );
+  }
+
+  void setScrollOffset(double offset) {
+    setState(() => _lastScrollOffset = offset);
   }
 
   /// check if any dates contains current date or not.

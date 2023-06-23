@@ -148,6 +148,8 @@ class DayView<T extends Object?> extends StatefulWidget {
   /// Scroll offset of day view page.
   final double scrollOffset;
 
+  final void Function(double)? scrollListener;
+
   /// This method will be called when user taps on event tile.
   final CellTapCallback<T>? onEventTap;
 
@@ -211,6 +213,7 @@ class DayView<T extends Object?> extends StatefulWidget {
     this.verticalLineOffset = 10,
     this.backgroundColor = Colors.white,
     this.scrollOffset = 0.0,
+    this.scrollListener,
     this.onEventTap,
     this.onDateLongPress,
     this.onDateTap,
@@ -385,8 +388,9 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
                       return ValueListenableBuilder(
                         valueListenable: _scrollConfiguration,
                         builder: (_, __, ___) => InternalDayViewPage<T>(
-                          key: ValueKey(
-                              _hourHeight.toString() + date.toString()),
+                          key: ValueKey(_hourHeight.toString() +
+                              date.toString() +
+                              _lastScrollOffset.toString()),
                           width: _width,
                           liveTimeIndicatorSettings: _liveTimeIndicatorSettings,
                           timeLineBuilder: _timeLineBuilder,
@@ -492,6 +496,9 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
 
   void _scrollPageListener(ScrollController controller) {
     _lastScrollOffset = controller.offset;
+    if (widget.scrollListener != null) {
+      widget.scrollListener!(controller.offset);
+    }
   }
 
   void _assignBuilders() {
@@ -775,6 +782,10 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
       duration: duration ?? widget.pageTransitionDuration,
       curve: curve ?? widget.pageTransitionCurve,
     );
+  }
+
+  void setScrollOffset(double offset) {
+    setState(() => _lastScrollOffset = offset);
   }
 
   /// Returns the current visible date in day view.
