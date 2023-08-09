@@ -110,8 +110,6 @@ class EventController<T extends Object?> extends ChangeNotifier {
   /// To overwrite default behaviour of this function,
   /// provide [_eventFilter] argument in [EventController] constructor.
   List<CalendarEventData<T>> getEventsOnDay(DateTime date) {
-    if (_eventFilter != null) return _eventFilter!.call(date, this.events);
-
     final events = <CalendarEventData<T>>[];
 
     if (_calendarData.events[date] != null) {
@@ -129,7 +127,7 @@ class EventController<T extends Object?> extends ChangeNotifier {
 
     events.addAll(getFullDayEvent(date));
 
-    return events;
+    return _eventFilter == null ? events : events.where(_eventFilter!).toList();
   }
 
   /// Returns full day events on given day.
