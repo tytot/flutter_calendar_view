@@ -214,27 +214,27 @@ class _InternalWeekViewPageState<T extends Object?>
             thickness: 1,
             height: 1,
           ),
-          SizedBox(
-            width: widget.width,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                    width: widget.timeLineWidth +
-                        widget.hourIndicatorSettings.offset),
-                ...List.generate(
-                  filteredDates.length,
-                  (index) => SizedBox(
-                    width: widget.weekTitleWidth,
-                    child: widget.fullDayEventBuilder?.call(
-                      widget.controller.getFullDayEvent(filteredDates[index]),
-                      widget.dates[index],
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
+          // SizedBox(
+          //   width: widget.width,
+          //   child: Row(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       SizedBox(
+          //           width: widget.timeLineWidth +
+          //               widget.hourIndicatorSettings.offset),
+          //       ...List.generate(
+          //         filteredDates.length,
+          //         (index) => SizedBox(
+          //           width: widget.weekTitleWidth,
+          //           child: widget.fullDayEventBuilder?.call(
+          //             widget.controller.getFullDayEvent(filteredDates[index]),
+          //             widget.dates[index],
+          //           ),
+          //         ),
+          //       )
+          //     ],
+          //   ),
+          // ),
           Expanded(
             child: SingleChildScrollView(
               controller: scrollController,

@@ -81,17 +81,14 @@ class EventController<T extends Object?> extends ChangeNotifier {
     // Removes the event from single event map.
     if (_calendarData.events[date] != null) {
       if (_calendarData.events[date]!.remove(event)) {
+        final endDate = event.endDate.withoutTime;
+        if (endDate.isAfter(date)) {
+          _calendarData.events[endDate]?.remove(event);
+        }
         _calendarData.eventList.remove(event);
         notifyListeners();
-        return;
       }
     }
-
-    // Removes the event from ranging or full day event.
-    _calendarData.eventList.remove(event);
-    _calendarData.rangingEventList.remove(event);
-    _calendarData.fullDayEventList.remove(event);
-    notifyListeners();
   }
 
   /// Removes multiple [event] from this controller.
@@ -99,9 +96,7 @@ class EventController<T extends Object?> extends ChangeNotifier {
     for (final e in _calendarData.events.values) {
       e.removeWhere(test);
     }
-    _calendarData.rangingEventList.removeWhere(test);
     _calendarData.eventList.removeWhere(test);
-    _calendarData.fullDayEventList.removeWhere(test);
     notifyListeners();
   }
 
@@ -116,30 +111,7 @@ class EventController<T extends Object?> extends ChangeNotifier {
       events.addAll(_calendarData.events[date]!);
     }
 
-    for (final rangingEvent in _calendarData.rangingEventList) {
-      if (date == rangingEvent.date ||
-          date == rangingEvent.endDate ||
-          (date.isBefore(rangingEvent.endDate) &&
-              date.isAfter(rangingEvent.date))) {
-        events.add(rangingEvent);
-      }
-    }
-
-    events.addAll(getFullDayEvent(date));
-
     return _eventFilter == null ? events : events.where(_eventFilter!).toList();
-  }
-
-  /// Returns full day events on given day.
-  List<CalendarEventData<T>> getFullDayEvent(DateTime dateTime) {
-    final events = <CalendarEventData<T>>[];
-    for (final event in _calendarData.fullDayEventList) {
-      if (dateTime.difference(event.date).inDays >= 0 &&
-          event.endDate.difference(dateTime).inDays > 0) {
-        events.add(event);
-      }
-    }
-    return events;
   }
 
   void updateFilter({required EventFilter<T> newFilter}) {
@@ -156,15 +128,13 @@ class EventController<T extends Object?> extends ChangeNotifier {
     assert(event.endDate.difference(event.date).inDays >= 0,
         'The end date must be greater or equal to the start date');
     if (_calendarData.eventList.contains(event)) return;
-    if (event.endDate.difference(event.date).inDays > 0) {
-      if (event.startTime!.isDayStart && event.endTime!.isDayStart) {
-        _calendarData.fullDayEventList.add(event);
-      } else {
-        _calendarData.rangingEventList.add(event);
-      }
-    } else {
-      final date = event.date.withoutTime;
 
+    var dayDifference = event.endDate.difference(event.date).inDays;
+    if (!event.endTime!.isDayStart) {
+      dayDifference++;
+    }
+    for (var dayOffset = 0; dayOffset < dayDifference; dayOffset++) {
+      final date = event.date.add(Duration(days: dayOffset));
       if (_calendarData.events[date] == null) {
         _calendarData.events.addAll({
           date: [event],
@@ -188,10 +158,4 @@ class CalendarData<T> {
 
   // Stores all the events in a list.
   final eventList = <CalendarEventData<T>>[];
-
-  // Stores all the ranging events in a list.
-  final rangingEventList = <CalendarEventData<T>>[];
-
-  // Stores all full day events
-  final fullDayEventList = <CalendarEventData<T>>[];
 }

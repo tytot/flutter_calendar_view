@@ -170,8 +170,8 @@ class _InternalDayViewPageState<T extends Object?>
       width: widget.width,
       child: Column(
         children: [
-          widget.fullDayEventBuilder(
-              widget.controller.getFullDayEvent(widget.date), widget.date),
+          // widget.fullDayEventBuilder(
+          //     widget.controller.getFullDayEvent(widget.date), widget.date),
           Expanded(
             child: SingleChildScrollView(
               controller: scrollController,
