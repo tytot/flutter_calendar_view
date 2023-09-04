@@ -13,6 +13,7 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
 
   @override
   List<OrganizedCalendarEventData<T>> arrange({
+    required DateTime day,
     required List<CalendarEventData<T>> events,
     required double height,
     required double width,
@@ -21,33 +22,18 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
     final arrangedEvents = <OrganizedCalendarEventData<T>>[];
 
     for (final event in events) {
-      if (event.startTime == null ||
-          event.endTime == null ||
-          event.endTime!.getTotalMinutes <= event.startTime!.getTotalMinutes) {
-        if (!(event.endTime!.getTotalMinutes == 0 &&
-            event.startTime!.getTotalMinutes > 0)) {
-          assert(() {
-            try {
-              debugPrint(
-                  "Failed to add event because of one of the given reasons: "
-                  "\n1. Start time or end time might be null"
-                  "\n2. endTime occurs before or at the same time as startTime."
-                  "\nEvent data: \n$event\n");
-            } catch (e) {} // Suppress exceptions.
-
-            return true;
-          }(), "Can not add event in the list.");
-          continue;
-        }
+      if (event.startTime == null || event.endTime == null) {
+        continue;
       }
 
       final startTime = event.startTime!;
       final endTime = event.endTime!;
 
-      final eventStart = startTime.getTotalMinutes;
-      final eventEnd = endTime.getTotalMinutes == 0
-          ? Constants.minutesADay
-          : endTime.getTotalMinutes;
+      final eventStart =
+          DateUtils.isSameDay(day, startTime) ? startTime.getTotalMinutes : 0;
+      final eventEnd = DateUtils.isSameDay(day, endTime)
+          ? endTime.getTotalMinutes
+          : Constants.minutesADay;
 
       final arrangeEventLen = arrangedEvents.length;
 
@@ -79,8 +65,8 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
           bottom: bottom,
           left: 0,
           right: 0,
-          startDuration: startTime.copyFromMinutes(eventStart),
-          endDuration: endTime.copyFromMinutes(eventEnd),
+          startDuration: day.copyFromMinutes(eventStart),
+          endDuration: day.copyFromMinutes(eventEnd),
           events: [event],
         );
 

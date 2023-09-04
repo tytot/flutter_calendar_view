@@ -11,12 +11,14 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
 
   @override
   List<OrganizedCalendarEventData<T>> arrange({
+    required DateTime day,
     required List<CalendarEventData<T>> events,
     required double height,
     required double width,
     required double heightPerMinute,
   }) {
     final mergedEvents = MergeEventArranger<T>().arrange(
+      day: day,
       events: events,
       height: height,
       width: width,

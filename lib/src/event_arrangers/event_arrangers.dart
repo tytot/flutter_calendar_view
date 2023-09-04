@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../calendar_event_data.dart';
 import '../constants.dart';
@@ -27,6 +28,7 @@ abstract class EventArranger<T extends Object?> {
   /// [OrganizedCalendarEventData].
   ///
   List<OrganizedCalendarEventData<T>> arrange({
+    required DateTime day,
     required List<CalendarEventData<T>> events,
     required double height,
     required double width,

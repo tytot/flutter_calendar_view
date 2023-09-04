@@ -237,6 +237,7 @@ class EventGenerator<T extends Object?> extends StatelessWidget {
   /// of events and [eventTileBuilder] to display events.
   List<Widget> _generateEvents(BuildContext context) {
     final events = eventArranger.arrange(
+      day: date,
       events: this.events,
       height: height,
       width: width,
