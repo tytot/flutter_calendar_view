@@ -72,7 +72,7 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
 
           arrangedEvents.add(OrganizedCalendarEventData<T>(
             left: slotWidth * column,
-            right: slotWidth * (column + 1),
+            right: slotWidth * (columns.length - (column + 1)),
             top: top,
             bottom: bottom,
             startDuration: day.copyFromMinutes(sideEvent.start),
