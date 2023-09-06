@@ -176,6 +176,9 @@ class WeekView<T extends Object?> extends StatefulWidget {
   /// where events are not there.
   final MinuteSlotSize minuteSlotSize;
 
+  /// Use this field to disable the page view scrolling behavior
+  final ScrollPhysics? pageViewPhysics;
+
   /// Style for WeekView header.
   final HeaderStyle headerStyle;
 
@@ -226,6 +229,7 @@ class WeekView<T extends Object?> extends StatefulWidget {
     this.weekDayDateStringBuilder,
     this.headerStyle = const HeaderStyle(),
     this.safeAreaOption = const SafeAreaOption(),
+    this.pageViewPhysics,
     this.fullDayEventBuilder,
   })  : assert((timeLineOffset) >= 0,
             "timeLineOffset must be greater than or equal to 0"),
@@ -389,6 +393,7 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
                   height: _height,
                   width: _width,
                   child: PageView.builder(
+                    physics: widget.pageViewPhysics,
                     itemCount: _totalWeeks,
                     controller: _pageController,
                     onPageChanged: _onPageChange,

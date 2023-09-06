@@ -132,6 +132,9 @@ class MonthView<T extends Object?> extends StatefulWidget {
   /// Default value is [WeekDays.monday].
   final WeekDays startDay;
 
+  /// Use this field to disable the page view scrolling behavior
+  final ScrollPhysics? pageViewPhysics;
+
   /// Style for MontView header.
   final HeaderStyle headerStyle;
 
@@ -166,6 +169,7 @@ class MonthView<T extends Object?> extends StatefulWidget {
     this.weekDayStringBuilder,
     this.headerStyle = const HeaderStyle(),
     this.safeAreaOption = const SafeAreaOption(),
+    this.pageViewPhysics,
   }) : super(key: key);
 
   @override
@@ -292,6 +296,7 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
             ),
             Expanded(
               child: PageView.builder(
+                physics: widget.pageViewPhysics,
                 controller: _pageController,
                 onPageChanged: _onPageChange,
                 itemBuilder: (_, index) {

@@ -169,9 +169,6 @@ class DayView<T extends Object?> extends StatefulWidget {
   /// where events are not there.
   final MinuteSlotSize minuteSlotSize;
 
-  /// Use this field to disable the calendar scrolling
-  final ScrollPhysics? scrollPhysics;
-
   /// Use this field to disable the page view scrolling behavior
   final ScrollPhysics? pageViewPhysics;
 
@@ -221,7 +218,6 @@ class DayView<T extends Object?> extends StatefulWidget {
     this.headerStyle = const HeaderStyle(),
     this.fullDayEventBuilder,
     this.safeAreaOption = const SafeAreaOption(),
-    this.scrollPhysics,
     this.pageViewPhysics,
     this.dayDetectorBuilder,
     this.showHalfHours = false,
