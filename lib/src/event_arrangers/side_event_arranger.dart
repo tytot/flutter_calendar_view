@@ -27,79 +27,59 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
 
     final arrangedEvents = <OrganizedCalendarEventData<T>>[];
 
-    for (final event in mergedEvents) {
-      // If there is only one event in list that means, there
-      // is no simultaneous events.
-      if (event.events.length == 1) {
-        arrangedEvents.add(event);
+    for (final mergedEvent in mergedEvents) {
+      final concurrentEvents = mergedEvent.events;
+      if (concurrentEvents.isEmpty) {
+        continue;
+      }
+      if (concurrentEvents.length == 1) {
+        arrangedEvents.add(mergedEvent);
         continue;
       }
 
-      final concurrentEvents = event.events;
+      final columns = <List<_SideEventData<T>>>[];
 
-      if (concurrentEvents.isEmpty) continue;
+      for (final event in concurrentEvents) {
+        final startTime = event.startTime!;
+        final endTime = event.endTime!;
+        final eventStart =
+            DateUtils.isSameDay(day, startTime) ? startTime.getTotalMinutes : 0;
+        final eventEnd = DateUtils.isSameDay(day, endTime)
+            ? endTime.getTotalMinutes
+            : Constants.minutesADay;
+        final sideEvent =
+            _SideEventData(start: eventStart, end: eventEnd, event: event);
 
-      var column = 1;
-      final sideEventData = <_SideEventData<T>>[];
-      var currentEventIndex = 0;
-
-      while (concurrentEvents.isNotEmpty) {
-        final event = concurrentEvents[currentEventIndex];
-        final end = event.endTime!.getTotalMinutes == 0
-            ? Constants.minutesADay
-            : event.endTime!.getTotalMinutes;
-        sideEventData.add(_SideEventData(column: column, event: event));
-        concurrentEvents.removeAt(currentEventIndex);
-
-        while (currentEventIndex < concurrentEvents.length) {
-          if (end <
-              concurrentEvents[currentEventIndex].startTime!.getTotalMinutes) {
-            break;
-          }
-
-          currentEventIndex++;
-        }
-
-        if (concurrentEvents.isNotEmpty &&
-            currentEventIndex >= concurrentEvents.length) {
-          column++;
-          currentEventIndex = 0;
+        var column = columns.indexWhere((sideEvents) => sideEvents
+            .every((otherSideEvent) => !otherSideEvent.overlaps(sideEvent)));
+        if (column == -1) {
+          column = columns.length;
+          columns.add([sideEvent]);
+        } else {
+          columns[column].add(sideEvent);
         }
       }
 
-      final slotWidth = width / column;
+      final slotWidth = width / columns.length;
 
-      for (final sideEvent in sideEventData) {
-        if (sideEvent.event.startTime == null ||
-            sideEvent.event.endTime == null) {
-          assert(() {
-            try {
-              debugPrint("Start time or end time of an event can not be null. "
-                  "This ${sideEvent.event} will be ignored.");
-            } catch (e) {} // Suppress exceptions.
+      for (var column = 0; column < columns.length; column++) {
+        final sideEvents = columns[column];
+        for (final sideEvent in sideEvents) {
+          final top = sideEvent.start * heightPerMinute;
+          final bottom = sideEvent.end * heightPerMinute == height
+              ? 0.0
+              : height - sideEvent.end * heightPerMinute;
 
-            return true;
-          }(), "Can not add event in the list.");
-
-          continue;
+          arrangedEvents.add(OrganizedCalendarEventData<T>(
+            left: slotWidth * column,
+            right: slotWidth * (column + 1),
+            top: top,
+            bottom: bottom,
+            startDuration: day.copyFromMinutes(sideEvent.start),
+            endDuration: day.copyFromMinutes(sideEvent.end),
+            events: [sideEvent.event],
+          ));
         }
-
-        final startTime = sideEvent.event.startTime!;
-        final endTime = sideEvent.event.endTime!;
-        final bottom = height -
-            (endTime.getTotalMinutes == 0
-                    ? Constants.minutesADay
-                    : endTime.getTotalMinutes) *
-                heightPerMinute;
-        arrangedEvents.add(OrganizedCalendarEventData<T>(
-          left: slotWidth * (sideEvent.column - 1),
-          right: slotWidth * (column - sideEvent.column),
-          top: startTime.getTotalMinutes * heightPerMinute,
-          bottom: bottom,
-          startDuration: startTime,
-          endDuration: endTime,
-          events: [sideEvent.event],
-        ));
       }
     }
 
@@ -108,11 +88,20 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
 }
 
 class _SideEventData<T> {
-  final int column;
+  final int start;
+  final int end;
   final CalendarEventData<T> event;
 
   const _SideEventData({
-    required this.column,
+    required this.start,
+    required this.end,
     required this.event,
   });
+
+  bool overlaps(_SideEventData other) {
+    return (start >= other.start && start < other.end) ||
+        (end > other.start && end <= other.end) ||
+        (other.start >= start && other.start < end) ||
+        (other.end > start && other.end <= end);
+  }
 }
