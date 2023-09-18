@@ -21,11 +21,12 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
   }) {
     final arrangedEvents = <OrganizedCalendarEventData<T>>[];
 
-    for (final event in events) {
-      if (event.startTime == null || event.endTime == null) {
-        continue;
-      }
+    final timedEvents = events
+        .where((event) => event.startTime != null && event.endTime != null)
+        .toList()
+      ..sort((a, b) => a.startTime!.compareTo(b.startTime!));
 
+    for (final event in timedEvents) {
       final startTime = event.startTime!;
       final endTime = event.endTime!;
 
@@ -33,28 +34,44 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
           DateUtils.isSameDay(day, startTime) ? startTime.getTotalMinutes : 0;
       final eventEnd = DateUtils.isSameDay(day, endTime)
           ? endTime.getTotalMinutes
-          : Constants.minutesADay;
+          : Duration.minutesPerDay;
 
-      final arrangeEventLen = arrangedEvents.length;
-
-      var eventIndex = -1;
-
-      for (var i = 0; i < arrangeEventLen; i++) {
+      var isOverlapping = false;
+      if (arrangedEvents.isNotEmpty) {
+        final lastArrangedEvent = arrangedEvents[arrangedEvents.length - 1];
         final arrangedEventStart =
-            arrangedEvents[i].startDuration.getTotalMinutes;
+            lastArrangedEvent.startDuration.getTotalMinutes;
         final arrangedEventEnd =
-            arrangedEvents[i].endDuration.getTotalMinutes == 0
-                ? Constants.minutesADay
-                : arrangedEvents[i].endDuration.getTotalMinutes;
+            lastArrangedEvent.endDuration.getTotalMinutes == 0
+                ? Duration.minutesPerDay
+                : lastArrangedEvent.endDuration.getTotalMinutes;
 
-        if (_checkIsOverlapping(
-            arrangedEventStart, arrangedEventEnd, eventStart, eventEnd)) {
-          eventIndex = i;
-          break;
+        isOverlapping = _isOverlapping(
+            arrangedEventStart, arrangedEventEnd, eventStart, eventEnd);
+        if (isOverlapping) {
+          final startDuration = min(eventStart, arrangedEventStart);
+          final endDuration = max(eventEnd, arrangedEventEnd);
+
+          final top = startDuration * heightPerMinute;
+          final bottom = endDuration * heightPerMinute == height
+              ? 0.0
+              : height - endDuration * heightPerMinute;
+
+          final newEvent = OrganizedCalendarEventData<T>(
+            top: top,
+            bottom: bottom,
+            left: 0,
+            right: 0,
+            startDuration: day.copyFromMinutes(startDuration),
+            endDuration: day.copyFromMinutes(endDuration),
+            events: lastArrangedEvent.events..add(event),
+          );
+
+          arrangedEvents[arrangedEvents.length - 1] = newEvent;
         }
       }
 
-      if (eventIndex == -1) {
+      if (!isOverlapping) {
         final top = eventStart * heightPerMinute;
         final bottom = eventEnd * heightPerMinute == height
             ? 0.0
@@ -71,44 +88,13 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
         );
 
         arrangedEvents.add(newEvent);
-      } else {
-        final arrangedEventData = arrangedEvents[eventIndex];
-
-        final arrangedEventStart =
-            arrangedEventData.startDuration.getTotalMinutes;
-        final arrangedEventEnd =
-            arrangedEventData.endDuration.getTotalMinutes == 0
-                ? Constants.minutesADay
-                : arrangedEventData.endDuration.getTotalMinutes;
-
-        final startDuration = math.min(eventStart, arrangedEventStart);
-        final endDuration = math.max(eventEnd, arrangedEventEnd);
-
-        final top = startDuration * heightPerMinute;
-        final bottom = endDuration * heightPerMinute == height
-            ? 0.0
-            : height - endDuration * heightPerMinute;
-
-        final newEvent = OrganizedCalendarEventData<T>(
-          top: top,
-          bottom: bottom,
-          left: 0,
-          right: 0,
-          startDuration:
-              arrangedEventData.startDuration.copyFromMinutes(startDuration),
-          endDuration:
-              arrangedEventData.endDuration.copyFromMinutes(endDuration),
-          events: arrangedEventData.events..add(event),
-        );
-
-        arrangedEvents[eventIndex] = newEvent;
       }
     }
 
     return arrangedEvents;
   }
 
-  bool _checkIsOverlapping(int arrangedEventStart, int arrangedEventEnd,
+  bool _isOverlapping(int arrangedEventStart, int arrangedEventEnd,
       int eventStart, int eventEnd) {
     return (arrangedEventStart >= eventStart &&
             arrangedEventStart <= eventEnd) ||
