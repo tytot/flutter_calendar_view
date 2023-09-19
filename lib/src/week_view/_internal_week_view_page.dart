@@ -2,6 +2,8 @@
 // Use of this source code is governed by a MIT-style license
 // that can be found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../components/_internal_components.dart';
@@ -107,7 +109,9 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
   final EventScrollConfiguration scrollConfiguration;
 
   /// Display full day events.
-  final FullDayEventBuilder<T>? fullDayEventBuilder;
+  final FullDayEventBuilder<T> fullDayEventBuilder;
+
+  final double Function(int) fullDayEventHeightCalculator;
 
   final void Function(ScrollController) scrollListener;
 
@@ -142,7 +146,8 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
     required this.weekDays,
     required this.minuteSlotSize,
     required this.scrollConfiguration,
-    this.fullDayEventBuilder,
+    required this.fullDayEventBuilder,
+    required this.fullDayEventHeightCalculator,
     required this.scrollListener,
     this.scrollOffset = 0.0,
     required this.weekDetectorBuilder,
@@ -180,6 +185,10 @@ class _InternalWeekViewPageState<T extends Object?>
   @override
   Widget build(BuildContext context) {
     final filteredDates = _filteredDate();
+    final maxFullDayEventCount = filteredDates
+        .map((date) => widget.controller.getFullDayEvents(date).length)
+        .reduce(max);
+
     return Container(
       height: widget.height + widget.weekTitleHeight,
       width: widget.width,
@@ -214,27 +223,47 @@ class _InternalWeekViewPageState<T extends Object?>
             thickness: 1,
             height: 1,
           ),
-          // SizedBox(
-          //   width: widget.width,
-          //   child: Row(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       SizedBox(
-          //           width: widget.timeLineWidth +
-          //               widget.hourIndicatorSettings.offset),
-          //       ...List.generate(
-          //         filteredDates.length,
-          //         (index) => SizedBox(
-          //           width: widget.weekTitleWidth,
-          //           child: widget.fullDayEventBuilder?.call(
-          //             widget.controller.getFullDayEvent(filteredDates[index]),
-          //             widget.dates[index],
-          //           ),
-          //         ),
-          //       )
-          //     ],
-          //   ),
-          // ),
+          if (maxFullDayEventCount > 0)
+            SizedBox(
+              width: widget.width,
+              child: Row(
+                children: [
+                  Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                              right: BorderSide(
+                                  color: widget.hourIndicatorSettings.color),
+                              bottom: BorderSide(
+                                  color: widget.hourIndicatorSettings.color))),
+                      width: widget.timeLineWidth +
+                          widget.hourIndicatorSettings.offset,
+                      height: widget
+                          .fullDayEventHeightCalculator(maxFullDayEventCount)),
+                  ...List.generate(filteredDates.length, (index) {
+                    final fullDayEvents = widget.controller
+                        .getFullDayEvents(filteredDates[index]);
+                    return Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                        right: BorderSide(
+                            color: widget.hourIndicatorSettings.color),
+                        bottom: BorderSide(
+                            color: widget.hourIndicatorSettings.color),
+                      )),
+                      width: widget.weekTitleWidth,
+                      height: widget
+                          .fullDayEventHeightCalculator(maxFullDayEventCount),
+                      child: fullDayEvents.isNotEmpty
+                          ? widget.fullDayEventBuilder.call(
+                              fullDayEvents,
+                              filteredDates[index],
+                            )
+                          : null,
+                    );
+                  })
+                ],
+              ),
+            ),
           Expanded(
             child: SingleChildScrollView(
               controller: scrollController,

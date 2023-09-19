@@ -22,13 +22,11 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
     final arrangedEvents = <OrganizedCalendarEventData<T>>[];
 
     final timedEvents = events
-        .where((event) => event.startTime != null && event.endTime != null)
-        .toList()
-      ..sort((a, b) => a.startTime!.compareTo(b.startTime!));
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
 
     for (final event in timedEvents) {
-      final startTime = event.startTime!;
-      final endTime = event.endTime!;
+      final startTime = event.startTime;
+      final endTime = event.endTime;
 
       final eventStart =
           DateUtils.isSameDay(day, startTime) ? startTime.getTotalMinutes : 0;

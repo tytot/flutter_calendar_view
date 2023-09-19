@@ -165,13 +165,27 @@ class _InternalDayViewPageState<T extends Object?>
 
   @override
   Widget build(BuildContext context) {
+    final fullDayEvents = widget.controller.getFullDayEvents(widget.date);
+
     return Container(
       height: widget.height,
       width: widget.width,
       child: Column(
         children: [
-          // widget.fullDayEventBuilder(
-          //     widget.controller.getFullDayEvent(widget.date), widget.date),
+          if (fullDayEvents.isNotEmpty) ...[
+            Container(
+                margin: EdgeInsets.only(
+                    left: widget.timeLineWidth +
+                        widget.halfHourIndicatorSettings.offset +
+                        widget.verticalLineOffset -
+                        1),
+                decoration: BoxDecoration(
+                    border: Border(
+                        left: BorderSide(
+                            color: widget.hourIndicatorSettings.color))),
+                child: widget.fullDayEventBuilder(fullDayEvents, widget.date)),
+            Divider(height: 1, color: widget.hourIndicatorSettings.color)
+          ],
           Expanded(
             child: SingleChildScrollView(
               controller: scrollController,

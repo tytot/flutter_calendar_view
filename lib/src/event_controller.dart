@@ -11,21 +11,25 @@ import 'typedefs.dart';
 class EventController<T extends Object?> extends ChangeNotifier {
   /// Calendar controller to control all the events related operations like,
   /// adding event, removing event, etc.
-  EventController({
-    /// This method will provide list of events on particular date.
-    ///
-    /// This method is use full when you have recurring events.
-    /// As of now this library does not support recurring events.
-    /// You can implement same behaviour in this function.
-    /// This function will overwrite default behaviour of [getEventsOnDay]
-    /// function which will be used to display events on given day in
-    /// [MonthView], [DayView] and [WeekView].
-    ///
-    EventFilter<T>? eventFilter,
-  }) : _eventFilter = eventFilter;
+  EventController(
+      {
+      /// This method will provide list of events on particular date.
+      ///
+      /// This method is use full when you have recurring events.
+      /// As of now this library does not support recurring events.
+      /// You can implement same behaviour in this function.
+      /// This function will overwrite default behaviour of [getEventsOnDay]
+      /// function which will be used to display events on given day in
+      /// [MonthView], [DayView] and [WeekView].
+      ///
+      EventFilter<T>? eventFilter,
+      bool expandFullDayEvents = false})
+      : _eventFilter = eventFilter,
+        _expandFullDayEvents = expandFullDayEvents;
 
   //#region Private Fields
   EventFilter<T>? _eventFilter;
+  final bool _expandFullDayEvents;
 
   // Store all calendar event data
   final CalendarData<T> _calendarData = CalendarData();
@@ -34,14 +38,11 @@ class EventController<T extends Object?> extends ChangeNotifier {
 
   //#region Public Fields
 
-  // TODO: change the type from List<CalendarEventData>
-  //  to UnmodifiableListView provided in dart:collection.
-
   // Note: Do not use this getter inside of EventController class.
   // use _eventList instead.
   /// Returns list of [CalendarEventData<T>] stored in this controller.
   List<CalendarEventData<T>> get events =>
-      _calendarData.eventList.toList(growable: false);
+      _calendarData.daysOfEvent.keys.toList(growable: false);
 
   /// This method will provide list of events on particular date.
   ///
@@ -75,17 +76,14 @@ class EventController<T extends Object?> extends ChangeNotifier {
   }
 
   /// Removes [event] from this controller.
-  void remove(CalendarEventData<T> event) {
-    final date = event.date.withoutTime;
-
-    // Removes the event from single event map.
-    if (_calendarData.events[date] != null) {
-      if (_calendarData.events[date]!.remove(event)) {
-        final endDate = event.endDate.withoutTime;
-        if (endDate.isAfter(date)) {
-          _calendarData.events[endDate]?.remove(event);
-        }
-        _calendarData.eventList.remove(event);
+  void remove(CalendarEventData<T> event, {bool shouldNotifyListeners = true}) {
+    final days = _calendarData.daysOfEvent.remove(event);
+    if (days != null) {
+      for (final day in days) {
+        _calendarData.events[day]?.remove(event);
+        _calendarData.fullDayEvents[day]?.remove(event);
+      }
+      if (shouldNotifyListeners) {
         notifyListeners();
       }
     }
@@ -93,10 +91,10 @@ class EventController<T extends Object?> extends ChangeNotifier {
 
   /// Removes multiple [event] from this controller.
   void removeWhere(bool Function(CalendarEventData<T> element) test) {
-    for (final e in _calendarData.events.values) {
-      e.removeWhere(test);
+    final eventsToRemove = _calendarData.daysOfEvent.keys.where(test);
+    for (final event in eventsToRemove) {
+      remove(event, shouldNotifyListeners: false);
     }
-    _calendarData.eventList.removeWhere(test);
     notifyListeners();
   }
 
@@ -105,12 +103,20 @@ class EventController<T extends Object?> extends ChangeNotifier {
   /// To overwrite default behaviour of this function,
   /// provide [_eventFilter] argument in [EventController] constructor.
   List<CalendarEventData<T>> getEventsOnDay(DateTime date) {
-    final events = <CalendarEventData<T>>[];
+    final events = _expandFullDayEvents
+        ? [
+            ...?_calendarData.events[date],
+            ...?_calendarData.fullDayEvents[date]
+          ]
+        : (_calendarData.events[date] ?? []);
+    return _eventFilter == null ? events : events.where(_eventFilter!).toList();
+  }
 
-    if (_calendarData.events[date] != null) {
-      events.addAll(_calendarData.events[date]!);
+  List<CalendarEventData<T>> getFullDayEvents(DateTime date) {
+    if (_expandFullDayEvents) {
+      return [];
     }
-
+    final events = _calendarData.fullDayEvents[date] ?? [];
     return _eventFilter == null ? events : events.where(_eventFilter!).toList();
   }
 
@@ -127,24 +133,31 @@ class EventController<T extends Object?> extends ChangeNotifier {
   void _addEvent(CalendarEventData<T> event) {
     assert(event.endDate.difference(event.date).inDays >= 0,
         'The end date must be greater or equal to the start date');
-    if (_calendarData.eventList.contains(event)) return;
+    if (_calendarData.daysOfEvent.containsKey(event)) return;
 
     var dayDifference = event.endDate.difference(event.date).inDays;
-    if (!event.endTime!.isDayStart) {
+    if (!event.endTime.isDayStart) {
       dayDifference++;
     }
+    final days = <DateTime>[];
     for (var dayOffset = 0; dayOffset < dayDifference; dayOffset++) {
       final date = event.date.add(Duration(days: dayOffset));
-      if (_calendarData.events[date] == null) {
-        _calendarData.events.addAll({
+      days.add(date);
+
+      final isFullDay = !event.startTime.isAfter(date) &&
+          !event.endTime.isBefore(date.copyFromMinutes(Duration.minutesPerDay));
+      final map =
+          isFullDay ? _calendarData.fullDayEvents : _calendarData.events;
+
+      if (map[date] == null) {
+        map.addAll({
           date: [event],
         });
       } else {
-        _calendarData.events[date]!.add(event);
+        map[date]!.add(event);
       }
     }
-
-    _calendarData.eventList.add(event);
+    _calendarData.daysOfEvent[event] = days;
 
     notifyListeners();
   }
@@ -153,9 +166,8 @@ class EventController<T extends Object?> extends ChangeNotifier {
 }
 
 class CalendarData<T> {
-  // Stores events that occurs only once in a map.
   final events = <DateTime, List<CalendarEventData<T>>>{};
+  final fullDayEvents = <DateTime, List<CalendarEventData<T>>>{};
 
-  // Stores all the events in a list.
-  final eventList = <CalendarEventData<T>>[];
+  final daysOfEvent = <CalendarEventData<T>, List<DateTime>>{};
 }

@@ -40,8 +40,8 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
       final columns = <List<_SideEventData<T>>>[];
 
       for (final event in concurrentEvents) {
-        final startTime = event.startTime!;
-        final endTime = event.endTime!;
+        final startTime = event.startTime;
+        final endTime = event.endTime;
         final eventStart =
             DateUtils.isSameDay(day, startTime) ? startTime.getTotalMinutes : 0;
         final eventEnd = DateUtils.isSameDay(day, endTime)
