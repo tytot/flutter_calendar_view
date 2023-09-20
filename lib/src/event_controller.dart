@@ -76,24 +76,33 @@ class EventController<T extends Object?> extends ChangeNotifier {
   }
 
   /// Removes [event] from this controller.
-  void remove(CalendarEventData<T> event, {bool shouldNotifyListeners = true}) {
+  void remove(CalendarEventData<T> event) {
     final days = _calendarData.daysOfEvent.remove(event);
     if (days != null) {
       for (final day in days) {
         _calendarData.events[day]?.remove(event);
         _calendarData.fullDayEvents[day]?.remove(event);
       }
-      if (shouldNotifyListeners) {
-        notifyListeners();
-      }
+      notifyListeners();
     }
   }
 
   /// Removes multiple [event] from this controller.
   void removeWhere(bool Function(CalendarEventData<T> element) test) {
-    final eventsToRemove = _calendarData.daysOfEvent.keys.where(test);
+    final eventsToRemove = <CalendarEventData<T>>[];
+    for (final entry in _calendarData.daysOfEvent.entries) {
+      final event = entry.key;
+      if (test(event)) {
+        eventsToRemove.add(event);
+        final days = entry.value;
+        for (final day in days) {
+          _calendarData.events[day]?.remove(event);
+          _calendarData.fullDayEvents[day]?.remove(event);
+        }
+      }
+    }
     for (final event in eventsToRemove) {
-      remove(event, shouldNotifyListeners: false);
+      _calendarData.daysOfEvent.remove(event);
     }
     notifyListeners();
   }
