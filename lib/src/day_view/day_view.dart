@@ -784,6 +784,10 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
     setState(() => _lastScrollOffset = offset);
   }
 
+  void changeScrollOffset(double offsetDelta) {
+    setState(() => _lastScrollOffset += offsetDelta);
+  }
+
   /// Returns the current visible date in day view.
   DateTime get currentDate =>
       DateTime(_currentDate.year, _currentDate.month, _currentDate.day);

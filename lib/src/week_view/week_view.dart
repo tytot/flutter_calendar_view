@@ -882,6 +882,10 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
     setState(() => _lastScrollOffset = offset);
   }
 
+  void changeScrollOffset(double offsetDelta) {
+    setState(() => _lastScrollOffset += offsetDelta);
+  }
+
   /// check if any dates contains current date or not.
   /// Returns true if it does else false.
   bool _showLiveTimeIndicator(List<DateTime> dates) =>
