@@ -2,6 +2,8 @@
 // Use of this source code is governed by a MIT-style license
 // that can be found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../calendar_constants.dart';
@@ -258,7 +260,6 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
   late double _height;
   late double _timeLineWidth;
   late double _hourHeight;
-  late double _lastScrollOffset;
   late DateTime _currentStartDate;
   late DateTime _currentEndDate;
   late DateTime _maxDate;
@@ -291,6 +292,9 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
 
   late List<WeekDays> _weekDays;
 
+  late final Map<int, ScrollController> _scrollControllerMap = {};
+  late double _lastScrollOffset = widget.scrollOffset;
+
   final _scrollConfiguration = EventScrollConfiguration();
 
   @override
@@ -307,7 +311,6 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
     _regulateCurrentDate();
 
     _calculateHeights();
-    _lastScrollOffset = widget.scrollOffset;
     _pageController = PageController(initialPage: _currentIndex);
     _eventArranger = widget.eventArranger ?? SideEventArranger<T>();
 
@@ -405,12 +408,18 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
                               _minDate.day + (index * DateTime.daysPerWeek))
                           .datesOfWeek(start: widget.startDay);
 
+                      final scrollController = ScrollController(
+                        initialScrollOffset: _lastScrollOffset,
+                      );
+                      scrollController.addListener(
+                          () => _scrollPageListener(scrollController));
+                      _scrollControllerMap[index] = scrollController;
+
                       return ValueListenableBuilder(
                         valueListenable: _scrollConfiguration,
                         builder: (_, __, ___) => InternalWeekViewPage<T>(
-                          key: ValueKey(_hourHeight.toString() +
-                              dates[0].toString() +
-                              _lastScrollOffset.toString()),
+                          key: ValueKey(
+                              _hourHeight.toString() + dates[0].toString()),
                           height: _height,
                           width: _width,
                           weekTitleWidth: _weekTitleWidth,
@@ -435,8 +444,7 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
                           showVerticalLine: true,
                           controller: controller,
                           hourHeight: _hourHeight,
-                          scrollOffset: _lastScrollOffset,
-                          scrollListener: _scrollPageListener,
+                          scrollController: scrollController,
                           eventArranger: _eventArranger,
                           weekDays: _weekDays,
                           minuteSlotSize: widget.minuteSlotSize,
@@ -529,10 +537,10 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
     _height = _hourHeight * Constants.hoursADay;
   }
 
-  void _scrollPageListener(ScrollController controller) {
-    _lastScrollOffset = controller.offset;
+  void _scrollPageListener(ScrollController scrollController) {
+    _lastScrollOffset = scrollController.offset;
     if (widget.scrollListener != null) {
-      widget.scrollListener!(controller.offset);
+      widget.scrollListener!(_lastScrollOffset);
     }
   }
 
@@ -878,12 +886,27 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
     );
   }
 
-  void setScrollOffset(double offset) {
-    setState(() => _lastScrollOffset = offset);
+  double? jumpToOffset(double offset) {
+    final page = _pageController.page?.round();
+    final scrollController = _scrollControllerMap[page];
+    if (scrollController == null) {
+      return null;
+    }
+    final newOffset = max(scrollController.position.minScrollExtent,
+        min(scrollController.position.maxScrollExtent, offset));
+    scrollController.jumpTo(newOffset);
+    return newOffset;
   }
 
-  void changeScrollOffset(double offsetDelta) {
-    setState(() => _lastScrollOffset += offsetDelta);
+  double? jumpByOffsetDelta(double offsetDelta) {
+    final page = _pageController.page?.round();
+    final scrollController = _scrollControllerMap[page];
+    if (scrollController == null) {
+      return null;
+    }
+    final oldOffset = scrollController.offset;
+    final newOffset = jumpToOffset(oldOffset + offsetDelta);
+    return newOffset == null ? null : newOffset - oldOffset;
   }
 
   /// check if any dates contains current date or not.

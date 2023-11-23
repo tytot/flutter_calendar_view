@@ -98,9 +98,7 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
   /// Settings for half hour indicator lines.
   final HourIndicatorSettings halfHourIndicatorSettings;
 
-  final void Function(ScrollController) scrollListener;
-
-  final double scrollOffset;
+  final ScrollController scrollController;
 
   /// Defines a single day page.
   const InternalDayViewPage({
@@ -127,8 +125,7 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
     required this.minuteSlotSize,
     required this.scrollNotifier,
     required this.fullDayEventBuilder,
-    required this.scrollListener,
-    this.scrollOffset = 0.0,
+    required this.scrollController,
     required this.dayDetectorBuilder,
     required this.showHalfHours,
     required this.halfHourIndicatorSettings,
@@ -140,27 +137,10 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
 
 class _InternalDayViewPageState<T extends Object?>
     extends State<InternalDayViewPage<T>> {
-  late ScrollController scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    scrollController = ScrollController(
-      initialScrollOffset: widget.scrollOffset,
-    );
-    scrollController.addListener(_scrollControllerListener);
-  }
-
   @override
   void dispose() {
-    scrollController
-      ..removeListener(_scrollControllerListener)
-      ..dispose();
+    widget.scrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollControllerListener() {
-    widget.scrollListener(scrollController);
   }
 
   @override
@@ -188,7 +168,8 @@ class _InternalDayViewPageState<T extends Object?>
           ],
           Expanded(
             child: SingleChildScrollView(
-              controller: scrollController,
+              controller: widget.scrollController,
+              physics: ClampingScrollPhysics(),
               child: SizedBox(
                 height: widget.height,
                 width: widget.width,

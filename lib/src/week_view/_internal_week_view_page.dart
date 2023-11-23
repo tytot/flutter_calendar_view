@@ -113,9 +113,7 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
 
   final double Function(int) fullDayEventHeightCalculator;
 
-  final void Function(ScrollController) scrollListener;
-
-  final double scrollOffset;
+  final ScrollController scrollController;
 
   /// A single page for week view.
   const InternalWeekViewPage({
@@ -148,8 +146,7 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
     required this.scrollConfiguration,
     required this.fullDayEventBuilder,
     required this.fullDayEventHeightCalculator,
-    required this.scrollListener,
-    this.scrollOffset = 0.0,
+    required this.scrollController,
     required this.weekDetectorBuilder,
   }) : super(key: key);
 
@@ -159,27 +156,10 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
 
 class _InternalWeekViewPageState<T extends Object?>
     extends State<InternalWeekViewPage<T>> {
-  late ScrollController scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    scrollController = ScrollController(
-      initialScrollOffset: widget.scrollOffset,
-    );
-    scrollController.addListener(_scrollControllerListener);
-  }
-
   @override
   void dispose() {
-    scrollController
-      ..removeListener(_scrollControllerListener)
-      ..dispose();
+    widget.scrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollControllerListener() {
-    widget.scrollListener(scrollController);
   }
 
   @override
@@ -266,7 +246,8 @@ class _InternalWeekViewPageState<T extends Object?>
             ),
           Expanded(
             child: SingleChildScrollView(
-              controller: scrollController,
+              controller: widget.scrollController,
+              physics: ClampingScrollPhysics(),
               child: SizedBox(
                 height: widget.height,
                 width: widget.width,

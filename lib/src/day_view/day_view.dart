@@ -3,6 +3,7 @@
 // that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -246,7 +247,6 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
   late double _height;
   late double _timeLineWidth;
   late double _hourHeight;
-  late double _lastScrollOffset;
   late DateTime _currentDate;
   late DateTime _maxDate;
   late DateTime _minDate;
@@ -275,6 +275,9 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
 
   late VoidCallback _reloadCallback;
 
+  late final Map<int, ScrollController> _scrollControllerMap = {};
+  late double _lastScrollOffset = widget.scrollOffset;
+
   final _scrollConfiguration = EventScrollConfiguration<T>();
 
   @override
@@ -289,9 +292,9 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
     _regulateCurrentDate();
 
     _calculateHeights();
-    _lastScrollOffset = widget.scrollOffset;
     _pageController = PageController(initialPage: _currentIndex);
     _eventArranger = widget.eventArranger ?? SideEventArranger<T>();
+
     _assignBuilders();
   }
 
@@ -381,12 +384,19 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
                     itemBuilder: (_, index) {
                       final date = DateTime(
                           _minDate.year, _minDate.month, _minDate.day + index);
+
+                      final scrollController = ScrollController(
+                        initialScrollOffset: _lastScrollOffset,
+                      );
+                      scrollController.addListener(
+                          () => _scrollPageListener(scrollController));
+                      _scrollControllerMap[index] = scrollController;
+
                       return ValueListenableBuilder(
                         valueListenable: _scrollConfiguration,
                         builder: (_, __, ___) => InternalDayViewPage<T>(
-                          key: ValueKey(_hourHeight.toString() +
-                              date.toString() +
-                              _lastScrollOffset.toString()),
+                          key: ValueKey(
+                              _hourHeight.toString() + date.toString()),
                           width: _width,
                           liveTimeIndicatorSettings: _liveTimeIndicatorSettings,
                           timeLineBuilder: _timeLineBuilder,
@@ -411,8 +421,7 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
                           minuteSlotSize: widget.minuteSlotSize,
                           scrollNotifier: _scrollConfiguration,
                           fullDayEventBuilder: _fullDayEventBuilder,
-                          scrollOffset: _lastScrollOffset,
-                          scrollListener: _scrollPageListener,
+                          scrollController: scrollController,
                           showHalfHours: widget.showHalfHours,
                           halfHourIndicatorSettings: _halfHourIndicatorSettings,
                         ),
@@ -490,10 +499,10 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
     _height = _hourHeight * Constants.hoursADay;
   }
 
-  void _scrollPageListener(ScrollController controller) {
-    _lastScrollOffset = controller.offset;
+  void _scrollPageListener(ScrollController scrollController) {
+    _lastScrollOffset = scrollController.offset;
     if (widget.scrollListener != null) {
-      widget.scrollListener!(controller.offset);
+      widget.scrollListener!(_lastScrollOffset);
     }
   }
 
@@ -780,12 +789,27 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
     );
   }
 
-  void setScrollOffset(double offset) {
-    setState(() => _lastScrollOffset = offset);
+  double? jumpToOffset(double offset) {
+    final page = _pageController.page?.round();
+    final scrollController = _scrollControllerMap[page];
+    if (scrollController == null) {
+      return null;
+    }
+    final newOffset = max(scrollController.position.minScrollExtent,
+        min(scrollController.position.maxScrollExtent, offset));
+    scrollController.jumpTo(newOffset);
+    return newOffset;
   }
 
-  void changeScrollOffset(double offsetDelta) {
-    setState(() => _lastScrollOffset += offsetDelta);
+  double? jumpByOffsetDelta(double offsetDelta) {
+    final page = _pageController.page?.round();
+    final scrollController = _scrollControllerMap[page];
+    if (scrollController == null) {
+      return null;
+    }
+    final oldOffset = scrollController.offset;
+    final newOffset = jumpToOffset(oldOffset + offsetDelta);
+    return newOffset == null ? null : newOffset - oldOffset;
   }
 
   /// Returns the current visible date in day view.
