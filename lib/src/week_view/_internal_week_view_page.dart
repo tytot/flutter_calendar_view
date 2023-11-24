@@ -326,7 +326,8 @@ class _InternalWeekViewPageState<T extends Object?>
                     ),
                     if (widget.showLiveLine &&
                         widget.liveTimeIndicatorSettings.height > 0)
-                      LiveTimeIndicator(
+                      IgnorePointer(
+                          child: LiveTimeIndicator(
                         liveTimeIndicatorSettings:
                             widget.liveTimeIndicatorSettings,
                         width: widget.width,
@@ -337,7 +338,7 @@ class _InternalWeekViewPageState<T extends Object?>
                             filteredDates.indexOf(date.withoutTime) *
                             widget.weekTitleWidth,
                         indicatorWidth: widget.weekTitleWidth,
-                      ),
+                      )),
                   ],
                 ),
               ),
