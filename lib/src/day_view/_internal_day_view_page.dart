@@ -206,13 +206,6 @@ class _InternalDayViewPageState<T extends Object?>
                               widget.halfHourIndicatorSettings.dashSpaceWidth,
                         ),
                       ),
-                    widget.dayDetectorBuilder(
-                      width: widget.width,
-                      height: widget.height,
-                      heightPerMinute: widget.heightPerMinute,
-                      date: widget.date,
-                      minuteSlotSize: widget.minuteSlotSize,
-                    ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: EventGenerator<T>(
@@ -229,6 +222,13 @@ class _InternalDayViewPageState<T extends Object?>
                             widget.hourIndicatorSettings.offset -
                             widget.verticalLineOffset,
                       ),
+                    ),
+                    widget.dayDetectorBuilder(
+                      width: widget.width,
+                      height: widget.height,
+                      heightPerMinute: widget.heightPerMinute,
+                      date: widget.date,
+                      minuteSlotSize: widget.minuteSlotSize,
                     ),
                     TimeLine(
                       height: widget.height,

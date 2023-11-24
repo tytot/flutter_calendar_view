@@ -107,9 +107,6 @@ class WeekView<T extends Object?> extends StatefulWidget {
   /// Width of time line.
   final double? timeLineWidth;
 
-  /// Flag to show live time indicator in all day or only [initialDay]
-  final bool showLiveTimeLineInAllDays;
-
   /// Offset of time line
   final double timeLineOffset;
 
@@ -201,7 +198,6 @@ class WeekView<T extends Object?> extends StatefulWidget {
       this.pageTransitionCurve = Curves.ease,
       this.heightPerMinute = 1,
       this.timeLineOffset = 0,
-      this.showLiveTimeLineInAllDays = false,
       this.width,
       this.minDay,
       this.maxDay,
@@ -436,8 +432,7 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
                           heightPerMinute: widget.heightPerMinute,
                           hourIndicatorSettings: _hourIndicatorSettings,
                           dates: dates,
-                          showLiveLine: widget.showLiveTimeLineInAllDays ||
-                              _showLiveTimeIndicator(dates),
+                          showLiveLine: _showLiveTimeIndicator(dates),
                           timeLineOffset: widget.timeLineOffset,
                           timeLineWidth: _timeLineWidth,
                           verticalLineOffset: 0,

@@ -17,7 +17,8 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
     required double width,
     required double heightPerMinute,
   }) {
-    final mergedEvents = MergeEventArranger<T>().arrange(
+    final mergedEvents =
+        MergeEventArranger<T>(mergeBackToBackEvents: false).arrange(
       day: day,
       events: events,
       height: height,

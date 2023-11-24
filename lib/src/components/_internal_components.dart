@@ -28,6 +28,10 @@ class LiveTimeIndicator extends StatefulWidget {
   /// Width of time line use to calculate offset of indicator.
   final double timeLineWidth;
 
+  final double Function(DateTime)? indicatorOffset;
+
+  final double? indicatorWidth;
+
   /// settings for time line. Defines color, extra offset,
   /// and height of indicator.
   final HourIndicatorSettings liveTimeIndicatorSettings;
@@ -41,6 +45,8 @@ class LiveTimeIndicator extends StatefulWidget {
       required this.width,
       required this.height,
       required this.timeLineWidth,
+      this.indicatorOffset,
+      this.indicatorWidth,
       required this.liveTimeIndicatorSettings,
       required this.heightPerMinute})
       : super(key: key);
@@ -86,8 +92,13 @@ class _LiveTimeIndicatorState extends State<LiveTimeIndicator> {
       painter: CurrentTimeLinePainter(
         color: widget.liveTimeIndicatorSettings.color,
         height: widget.liveTimeIndicatorSettings.height,
+        width: widget.indicatorWidth,
         offset: Offset(
-          widget.timeLineWidth + widget.liveTimeIndicatorSettings.offset,
+          widget.timeLineWidth +
+              (widget.indicatorOffset == null
+                  ? 0
+                  : widget.indicatorOffset!(_currentDate)) +
+              widget.liveTimeIndicatorSettings.offset,
           _currentDate.getTotalMinutes * widget.heightPerMinute,
         ),
       ),

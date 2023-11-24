@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../calendar_view.dart';
 import '../components/_internal_components.dart';
 import '../components/event_scroll_notifier.dart';
 import '../enumerations.dart';
@@ -265,16 +266,6 @@ class _InternalWeekViewPageState<T extends Object?>
                         showVerticalLine: widget.showVerticalLine,
                       ),
                     ),
-                    if (widget.showLiveLine &&
-                        widget.liveTimeIndicatorSettings.height > 0)
-                      LiveTimeIndicator(
-                        liveTimeIndicatorSettings:
-                            widget.liveTimeIndicatorSettings,
-                        width: widget.width,
-                        height: widget.height,
-                        heightPerMinute: widget.heightPerMinute,
-                        timeLineWidth: widget.timeLineWidth,
-                      ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: SizedBox(
@@ -298,13 +289,6 @@ class _InternalWeekViewPageState<T extends Object?>
                                 width: widget.weekTitleWidth,
                                 child: Stack(
                                   children: [
-                                    widget.weekDetectorBuilder(
-                                      width: widget.weekTitleWidth,
-                                      height: widget.height,
-                                      heightPerMinute: widget.heightPerMinute,
-                                      date: widget.dates[index],
-                                      minuteSlotSize: widget.minuteSlotSize,
-                                    ),
                                     EventGenerator<T>(
                                       height: widget.height,
                                       date: filteredDates[index],
@@ -317,6 +301,13 @@ class _InternalWeekViewPageState<T extends Object?>
                                       events: widget.controller
                                           .getEventsOnDay(filteredDates[index]),
                                       heightPerMinute: widget.heightPerMinute,
+                                    ),
+                                    widget.weekDetectorBuilder(
+                                      width: widget.weekTitleWidth,
+                                      height: widget.height,
+                                      heightPerMinute: widget.heightPerMinute,
+                                      date: widget.dates[index],
+                                      minuteSlotSize: widget.minuteSlotSize,
                                     ),
                                   ],
                                 ),
@@ -333,6 +324,20 @@ class _InternalWeekViewPageState<T extends Object?>
                       timeLineOffset: widget.timeLineOffset,
                       timeLineBuilder: widget.timeLineBuilder,
                     ),
+                    if (widget.showLiveLine &&
+                        widget.liveTimeIndicatorSettings.height > 0)
+                      LiveTimeIndicator(
+                        liveTimeIndicatorSettings:
+                            widget.liveTimeIndicatorSettings,
+                        width: widget.width,
+                        height: widget.height,
+                        heightPerMinute: widget.heightPerMinute,
+                        timeLineWidth: widget.timeLineWidth,
+                        indicatorOffset: (date) =>
+                            filteredDates.indexOf(date.withoutTime) *
+                            widget.weekTitleWidth,
+                        indicatorWidth: widget.weekTitleWidth,
+                      ),
                   ],
                 ),
               ),

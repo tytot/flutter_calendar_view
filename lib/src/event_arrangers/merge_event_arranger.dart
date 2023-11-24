@@ -9,7 +9,10 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
   /// events. and that will act like one single event.
   /// [OrganizedCalendarEventData.events] will gives
   /// list of all the combined events.
-  const MergeEventArranger();
+
+  final bool mergeBackToBackEvents;
+
+  const MergeEventArranger({this.mergeBackToBackEvents = true});
 
   @override
   List<OrganizedCalendarEventData<T>> arrange({
@@ -94,6 +97,13 @@ class MergeEventArranger<T extends Object?> extends EventArranger<T> {
 
   bool _isOverlapping(int arrangedEventStart, int arrangedEventEnd,
       int eventStart, int eventEnd) {
+    if (!mergeBackToBackEvents) {
+      return (arrangedEventStart >= eventStart &&
+              arrangedEventStart < eventEnd) ||
+          (arrangedEventEnd > eventStart && arrangedEventEnd <= eventEnd) ||
+          (eventStart >= arrangedEventStart && eventStart < arrangedEventEnd) ||
+          (eventEnd > arrangedEventStart && eventEnd <= arrangedEventEnd);
+    }
     return (arrangedEventStart >= eventStart &&
             arrangedEventStart <= eventEnd) ||
         (arrangedEventEnd >= eventStart && arrangedEventEnd <= eventEnd) ||

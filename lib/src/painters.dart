@@ -165,6 +165,9 @@ class CurrentTimeLinePainter extends CustomPainter {
   /// Height of time indicator.
   final double height;
 
+  /// Width of time indicator.
+  final double? width;
+
   /// offset of time indicator.
   final Offset offset;
 
@@ -179,6 +182,7 @@ class CurrentTimeLinePainter extends CustomPainter {
     this.showBullet = true,
     required this.color,
     required this.height,
+    this.width,
     required this.offset,
     this.bulletRadius = 5,
   });
@@ -187,7 +191,7 @@ class CurrentTimeLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.drawLine(
       Offset(offset.dx, offset.dy),
-      Offset(size.width, offset.dy),
+      Offset(width == null ? size.width : (offset.dx + width!), offset.dy),
       Paint()
         ..color = color
         ..strokeWidth = height,
