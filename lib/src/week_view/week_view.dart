@@ -883,23 +883,29 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
 
   double? jumpToOffset(double offset) {
     final page = _pageController.page?.round();
-    final scrollController = _scrollControllerMap[page];
-    if (scrollController == null) {
+    final primaryScrollController = _scrollControllerMap[page];
+    if (primaryScrollController?.hasClients != true) {
+      _lastScrollOffset = offset;
       return null;
     }
-    final newOffset = max(scrollController.position.minScrollExtent,
-        min(scrollController.position.maxScrollExtent, offset));
-    scrollController.jumpTo(newOffset);
+    final newOffset = max(primaryScrollController!.position.minScrollExtent,
+        min(primaryScrollController.position.maxScrollExtent, offset));
+    for (final scrollController in _scrollControllerMap.values) {
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(newOffset);
+      }
+    }
+    _lastScrollOffset = newOffset;
     return newOffset;
   }
 
   double? jumpByOffsetDelta(double offsetDelta) {
     final page = _pageController.page?.round();
-    final scrollController = _scrollControllerMap[page];
-    if (scrollController == null) {
+    final primaryScrollController = _scrollControllerMap[page];
+    if (primaryScrollController?.hasClients != true) {
       return null;
     }
-    final oldOffset = scrollController.offset;
+    final oldOffset = primaryScrollController!.offset;
     final newOffset = jumpToOffset(oldOffset + offsetDelta);
     return newOffset == null ? null : newOffset - oldOffset;
   }
