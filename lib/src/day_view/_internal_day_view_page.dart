@@ -169,7 +169,6 @@ class _InternalDayViewPageState<T extends Object?>
           Expanded(
             child: SingleChildScrollView(
               controller: widget.scrollController,
-              physics: ClampingScrollPhysics(),
               child: SizedBox(
                 height: widget.height,
                 width: widget.width,
