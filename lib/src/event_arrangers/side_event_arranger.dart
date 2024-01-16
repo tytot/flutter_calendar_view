@@ -7,7 +7,23 @@ part of 'event_arrangers.dart';
 class SideEventArranger<T extends Object?> extends EventArranger<T> {
   /// This class will provide method that will arrange
   /// all the events side by side.
-  const SideEventArranger();
+
+  final Map<DateTime, List<CalendarEventData<T>>> _additionalEventMap;
+
+  SideEventArranger({List<CalendarEventData<T>>? additionalEvents})
+      : _additionalEventMap = additionalEvents
+                ?.fold<Map<DateTime, List<CalendarEventData<T>>>>({},
+                    (map, event) {
+              final startDay = event.startTime.withoutTime;
+              final dayDifference =
+                  event.endTime.getDayDifference(event.startTime);
+              for (var i = 0; i <= dayDifference; i++) {
+                final day = startDay.add(Duration(days: i));
+                map[day] = (map[day]?..add(event)) ?? [event];
+              }
+              return map;
+            }) ??
+            {};
 
   @override
   List<OrganizedCalendarEventData<T>> arrange({
@@ -17,10 +33,13 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
     required double width,
     required double heightPerMinute,
   }) {
+    final additionalEvents = _additionalEventMap[day];
+
     final mergedEvents =
         MergeEventArranger<T>(mergeBackToBackEvents: false).arrange(
       day: day,
-      events: events,
+      events: additionalEvents == null ? events : events
+        ..addAll(additionalEvents!),
       height: height,
       width: width,
       heightPerMinute: heightPerMinute,
