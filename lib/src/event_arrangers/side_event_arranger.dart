@@ -33,13 +33,10 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
     required double width,
     required double heightPerMinute,
   }) {
-    final additionalEvents = _additionalEventMap[day];
-
     final mergedEvents =
         MergeEventArranger<T>(mergeBackToBackEvents: false).arrange(
       day: day,
-      events: additionalEvents == null ? events : events
-        ..addAll(additionalEvents!),
+      events: [...events, ...?_additionalEventMap[day]],
       height: height,
       width: width,
       heightPerMinute: heightPerMinute,
