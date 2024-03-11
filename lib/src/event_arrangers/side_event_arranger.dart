@@ -18,7 +18,8 @@ class SideEventArranger<T extends Object?> extends EventArranger<T> {
               final dayDifference =
                   event.endTime.getDayDifference(event.startTime);
               for (var i = 0; i <= dayDifference; i++) {
-                final day = startDay.add(Duration(days: i));
+                final day =
+                    DateTime(startDay.year, startDay.month, startDay.day + i);
                 map[day] = (map[day]?..add(event)) ?? [event];
               }
               return map;

@@ -150,7 +150,8 @@ class EventController<T extends Object?> extends ChangeNotifier {
     }
     final days = <DateTime>[];
     for (var dayOffset = 0; dayOffset < dayDifference; dayOffset++) {
-      final date = event.date.add(Duration(days: dayOffset));
+      final date = DateTime(
+          event.date.year, event.date.month, event.date.day + dayOffset);
       days.add(date);
 
       final isFullDay = !event.startTime.isAfter(date) &&
