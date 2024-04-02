@@ -158,7 +158,7 @@ class _InternalDayViewPageState<T extends Object?>
                     left: widget.timeLineWidth +
                         widget.halfHourIndicatorSettings.offset +
                         widget.verticalLineOffset -
-                        1),
+                        0.5),
                 decoration: BoxDecoration(
                     border: Border(
                         left: BorderSide(

@@ -217,7 +217,8 @@ class _InternalWeekViewPageState<T extends Object?>
                               bottom: BorderSide(
                                   color: widget.hourIndicatorSettings.color))),
                       width: widget.timeLineWidth +
-                          widget.hourIndicatorSettings.offset,
+                          widget.hourIndicatorSettings.offset +
+                          0.5,
                       height: widget
                           .fullDayEventHeightCalculator(maxFullDayEventCount)),
                   ...List.generate(filteredDates.length, (index) {
