@@ -30,6 +30,10 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
   /// Controller for calendar
   final EventController<T> controller;
 
+  final double subheaderHeight;
+
+  final DateWidgetBuilder subheaderBuilder;
+
   /// A builder that builds time line.
   final DateWidgetBuilder timeLineBuilder;
 
@@ -66,6 +70,8 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
 
   /// Offset  of vertical line.
   final double verticalLineOffset;
+
+  final int sections;
 
   /// Called when user taps on event tile.
   final CellTapCallback<T>? onTileTap;
@@ -108,6 +114,8 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
     required this.date,
     required this.eventTileBuilder,
     required this.controller,
+    required this.subheaderHeight,
+    required this.subheaderBuilder,
     required this.timeLineBuilder,
     required this.hourIndicatorSettings,
     required this.showLiveLine,
@@ -119,6 +127,7 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
     required this.hourHeight,
     required this.eventArranger,
     required this.verticalLineOffset,
+    required this.sections,
     required this.onTileTap,
     required this.onDateLongPress,
     required this.onDateTap,
@@ -148,10 +157,30 @@ class _InternalDayViewPageState<T extends Object?>
     final fullDayEvents = widget.controller.getFullDayEvents(widget.date);
 
     return Container(
-      height: widget.height,
+      height: widget.height + widget.subheaderHeight,
       width: widget.width,
       child: Column(
         children: [
+          if (widget.subheaderHeight > 0) ...[
+            SizedBox(
+              height: widget.subheaderHeight,
+              width: widget.width,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                      height: widget.subheaderHeight,
+                      width: widget.timeLineWidth +
+                          widget.hourIndicatorSettings.offset),
+                  widget.subheaderBuilder(widget.date)
+                ],
+              ),
+            ),
+            Divider(
+              thickness: 1,
+              height: 1,
+            ),
+          ],
           if (fullDayEvents.isNotEmpty) ...[
             Container(
                 margin: EdgeInsets.only(

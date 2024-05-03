@@ -46,6 +46,10 @@ class DayView<T extends Object?> extends StatefulWidget {
   /// Builds day title bar.
   final DateWidgetBuilder? dayTitleBuilder;
 
+  final double? subheaderHeight;
+
+  final DateWidgetBuilder? subheaderBuilder;
+
   /// Builds custom PressDetector widget
   ///
   /// If null, internal PressDetector will be used to handle onDateLongPress()
@@ -143,6 +147,8 @@ class DayView<T extends Object?> extends StatefulWidget {
   /// Defines offset of vertical line from hour line starts.
   final double verticalLineOffset;
 
+  final int sections;
+
   /// Background colour of day view page.
   final Color? backgroundColor;
 
@@ -207,8 +213,11 @@ class DayView<T extends Object?> extends StatefulWidget {
     this.liveTimeIndicatorSettings,
     this.onPageChange,
     this.dayTitleBuilder,
+    this.subheaderHeight,
+    this.subheaderBuilder,
     this.eventArranger,
     this.verticalLineOffset = 10,
+    this.sections = 1,
     this.backgroundColor = Colors.white,
     this.scrollOffset = 0.0,
     this.scrollListener,
@@ -414,6 +423,10 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
                           timeLineWidth: _timeLineWidth,
                           verticalLineOffset: widget.verticalLineOffset,
                           showVerticalLine: widget.showVerticalLine,
+                          subheaderHeight: widget.subheaderHeight ?? 0,
+                          subheaderBuilder: widget.subheaderBuilder ??
+                              (_) => const SizedBox.shrink(),
+                          sections: widget.sections,
                           height: _height,
                           controller: controller,
                           hourHeight: _hourHeight,

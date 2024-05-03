@@ -27,6 +27,8 @@ class HourLinePainter extends CustomPainter {
   /// left offset of vertical line.
   final double verticalLineOffset;
 
+  final int sections;
+
   /// Style of the hour and vertical line
   final LineStyle lineStyle;
 
@@ -44,6 +46,7 @@ class HourLinePainter extends CustomPainter {
     required this.offset,
     required this.showVerticalLine,
     this.verticalLineOffset = 10,
+    this.sections = 1,
     this.lineStyle = LineStyle.solid,
     this.dashWidth = 4,
     this.dashSpaceWidth = 4,
@@ -79,6 +82,17 @@ class HourLinePainter extends CustomPainter {
     } else {
       canvas.drawLine(Offset(offset + verticalLineOffset, 0),
           Offset(offset + verticalLineOffset, size.height), paint);
+    }
+
+    if (sections > 1) {
+      final sectionWidth =
+          (size.width - (offset + verticalLineOffset)) / sections;
+      for (var i = 1; i < sections; i++) {
+        canvas.drawLine(
+            Offset(offset + verticalLineOffset + i * sectionWidth, 0),
+            Offset(offset + verticalLineOffset + i * sectionWidth, size.height),
+            paint);
+      }
     }
   }
 
