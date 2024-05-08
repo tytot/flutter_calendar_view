@@ -181,21 +181,35 @@ class _InternalWeekViewPageState<T extends Object?>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: widget.weekTitleHeight,
-                  width: widget.timeLineWidth +
-                      widget.hourIndicatorSettings.offset,
-                  child: widget.weekNumberBuilder.call(filteredDates[0]),
-                ),
+                Container(
+                    decoration: BoxDecoration(
+                        border: Border(
+                      right:
+                          BorderSide(color: widget.hourIndicatorSettings.color),
+                    )),
+                    height: widget.weekTitleHeight,
+                    width: widget.timeLineWidth +
+                        widget.hourIndicatorSettings.offset +
+                        0.5,
+                    child: widget.weekNumberBuilder.call(filteredDates[0])),
                 ...List.generate(
                   filteredDates.length,
-                  (index) => SizedBox(
-                    height: widget.weekTitleHeight,
-                    width: widget.weekTitleWidth,
-                    child: widget.weekDayBuilder(
-                      filteredDates[index],
-                    ),
-                  ),
+                  (index) {
+                    return Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                        right: BorderSide(
+                            color: index == filteredDates.length - 1
+                                ? widget.hourIndicatorSettings.color
+                                : Colors.transparent),
+                      )),
+                      height: widget.weekTitleHeight,
+                      width: widget.weekTitleWidth,
+                      child: widget.weekDayBuilder(
+                        filteredDates[index],
+                      ),
+                    );
+                  },
                 )
               ],
             ),

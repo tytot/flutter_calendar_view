@@ -171,8 +171,9 @@ class _InternalDayViewPageState<T extends Object?>
                   SizedBox(
                       height: widget.subheaderHeight,
                       width: widget.timeLineWidth +
-                          widget.hourIndicatorSettings.offset),
-                  widget.subheaderBuilder(widget.date)
+                          widget.hourIndicatorSettings.offset +
+                          widget.verticalLineOffset),
+                  Expanded(child: widget.subheaderBuilder(widget.date))
                 ],
               ),
             ),
@@ -191,7 +192,11 @@ class _InternalDayViewPageState<T extends Object?>
                 decoration: BoxDecoration(
                     border: Border(
                         left: BorderSide(
-                            color: widget.hourIndicatorSettings.color))),
+                          color: widget.hourIndicatorSettings.color,
+                        ),
+                        right: BorderSide(
+                          color: widget.hourIndicatorSettings.color,
+                        ))),
                 child: widget.fullDayEventBuilder(fullDayEvents, widget.date)),
             Divider(height: 1, color: widget.hourIndicatorSettings.color)
           ],
@@ -203,22 +208,29 @@ class _InternalDayViewPageState<T extends Object?>
                 width: widget.width,
                 child: Stack(
                   children: [
-                    CustomPaint(
-                      size: Size(widget.width, widget.height),
-                      painter: HourLinePainter(
-                        lineColor: widget.hourIndicatorSettings.color,
-                        lineHeight: widget.hourIndicatorSettings.height,
-                        offset: widget.timeLineWidth +
-                            widget.hourIndicatorSettings.offset,
-                        minuteHeight: widget.heightPerMinute,
-                        verticalLineOffset: widget.verticalLineOffset,
-                        showVerticalLine: widget.showVerticalLine,
-                        lineStyle: widget.hourIndicatorSettings.lineStyle,
-                        dashWidth: widget.hourIndicatorSettings.dashWidth,
-                        dashSpaceWidth:
-                            widget.hourIndicatorSettings.dashSpaceWidth,
-                      ),
-                    ),
+                    DecoratedBox(
+                        decoration: BoxDecoration(
+                            border: Border(
+                          right: BorderSide(
+                              color: widget.hourIndicatorSettings.color),
+                        )),
+                        child: CustomPaint(
+                          size: Size(widget.width, widget.height),
+                          painter: HourLinePainter(
+                            lineColor: widget.hourIndicatorSettings.color,
+                            lineHeight: widget.hourIndicatorSettings.height,
+                            offset: widget.timeLineWidth +
+                                widget.hourIndicatorSettings.offset,
+                            minuteHeight: widget.heightPerMinute,
+                            verticalLineOffset: widget.verticalLineOffset,
+                            showVerticalLine: widget.showVerticalLine,
+                            sections: widget.sections,
+                            lineStyle: widget.hourIndicatorSettings.lineStyle,
+                            dashWidth: widget.hourIndicatorSettings.dashWidth,
+                            dashSpaceWidth:
+                                widget.hourIndicatorSettings.dashSpaceWidth,
+                          ),
+                        )),
                     if (widget.showHalfHours)
                       CustomPaint(
                         size: Size(widget.width, widget.height),

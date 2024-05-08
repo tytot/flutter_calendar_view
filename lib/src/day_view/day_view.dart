@@ -802,6 +802,26 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
     );
   }
 
+  Future<void> animateToOffset(double offset,
+      {required Duration duration, required Curve curve}) async {
+    final page = _pageController.page?.round();
+    final primaryScrollController = _scrollControllerMap[page];
+    if (primaryScrollController?.hasClients != true) {
+      _lastScrollOffset = offset;
+      return;
+    }
+    final newOffset = max(primaryScrollController!.position.minScrollExtent,
+        min(primaryScrollController.position.maxScrollExtent, offset));
+    await Future.wait(_scrollControllerMap.values.map((controller) {
+      if (controller.hasClients) {
+        return controller.animateTo(newOffset,
+            duration: duration, curve: curve);
+      }
+      return Future.value();
+    }));
+    _lastScrollOffset = newOffset;
+  }
+
   double? jumpToOffset(double offset) {
     final page = _pageController.page?.round();
     final primaryScrollController = _scrollControllerMap[page];

@@ -523,7 +523,7 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
         "hourIndicator height must be less than minuteHeight * 60");
 
     _weekTitleWidth =
-        (_width - _timeLineWidth - _hourIndicatorSettings.offset) /
+        (_width - _timeLineWidth - _hourIndicatorSettings.offset - 0.5) /
             _totalDaysInWeek;
   }
 
@@ -879,6 +879,26 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
       duration: duration ?? widget.pageTransitionDuration,
       curve: curve ?? widget.pageTransitionCurve,
     );
+  }
+
+  Future<void> animateToOffset(double offset,
+      {required Duration duration, required Curve curve}) async {
+    final page = _pageController.page?.round();
+    final primaryScrollController = _scrollControllerMap[page];
+    if (primaryScrollController?.hasClients != true) {
+      _lastScrollOffset = offset;
+      return;
+    }
+    final newOffset = max(primaryScrollController!.position.minScrollExtent,
+        min(primaryScrollController.position.maxScrollExtent, offset));
+    await Future.wait(_scrollControllerMap.values.map((controller) {
+      if (controller.hasClients) {
+        return controller.animateTo(newOffset,
+            duration: duration, curve: curve);
+      }
+      return Future.value();
+    }));
+    _lastScrollOffset = newOffset;
   }
 
   double? jumpToOffset(double offset) {
