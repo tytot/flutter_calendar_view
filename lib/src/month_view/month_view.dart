@@ -8,11 +8,11 @@ import '../calendar_constants.dart';
 import '../calendar_controller_provider.dart';
 import '../calendar_event_data.dart';
 import '../components/components.dart';
-import '../components/safe_area_wrapper.dart';
 import '../constants.dart';
 import '../enumerations.dart';
 import '../event_controller.dart';
 import '../extensions.dart';
+import '../safe_area_option.dart';
 import '../style/header_style.dart';
 import '../typedefs.dart';
 
@@ -283,83 +283,80 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeAreaWrapper(
-      option: widget.safeAreaOption,
-      child: SizedBox(
-        width: _width,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: _width,
-              child: _headerBuilder(_currentDate),
-            ),
-            Expanded(
-              child: PageView.builder(
-                physics: widget.pageViewPhysics,
-                controller: _pageController,
-                onPageChanged: _onPageChange,
-                itemBuilder: (_, index) {
-                  final date = DateTime(_minDate.year, _minDate.month + index);
-                  final weekDays = date.datesOfWeek(start: widget.startDay);
+    return SizedBox(
+      width: _width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: _width,
+            child: _headerBuilder(_currentDate),
+          ),
+          Expanded(
+            child: PageView.builder(
+              physics: widget.pageViewPhysics,
+              controller: _pageController,
+              onPageChanged: _onPageChange,
+              itemBuilder: (_, index) {
+                final date = DateTime(_minDate.year, _minDate.month + index);
+                final weekDays = date.datesOfWeek(start: widget.startDay);
 
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: _width,
-                        child: Row(
-                          children: List.generate(
-                            7,
-                            (index) => Expanded(
-                              child: SizedBox(
-                                width: _cellWidth,
-                                child:
-                                    _weekBuilder(weekDays[index].weekday - 1),
-                              ),
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: _width,
+                      child: Row(
+                        children: List.generate(
+                          7,
+                          (index) => Expanded(
+                            child: SizedBox(
+                              width: _cellWidth,
+                              child: _weekBuilder(weekDays[index].weekday - 1),
                             ),
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: LayoutBuilder(builder: (context, constraints) {
-                          final _cellAspectRatio =
-                              widget.useAvailableVerticalSpace
-                                  ? calculateCellAspectRatio(
-                                      constraints.maxHeight,
-                                    )
-                                  : widget.cellAspectRatio;
+                    ),
+                    Expanded(
+                      child: LayoutBuilder(builder: (context, constraints) {
+                        final _cellAspectRatio =
+                            widget.useAvailableVerticalSpace
+                                ? calculateCellAspectRatio(
+                                    constraints.maxHeight,
+                                  )
+                                : widget.cellAspectRatio;
 
-                          return SizedBox(
-                            height: _height,
+                        return SizedBox(
+                          height: _height,
+                          width: _width,
+                          child: _MonthPageBuilder<T>(
+                            key: ValueKey(date.toIso8601String()),
+                            onCellTap: widget.onCellTap,
+                            onDateLongPress: widget.onDateLongPress,
                             width: _width,
-                            child: _MonthPageBuilder<T>(
-                              key: ValueKey(date.toIso8601String()),
-                              onCellTap: widget.onCellTap,
-                              onDateLongPress: widget.onDateLongPress,
-                              width: _width,
-                              height: _height,
-                              controller: controller,
-                              borderColor: widget.borderColor,
-                              borderSize: widget.borderSize,
-                              cellBuilder: _cellBuilder,
-                              cellRatio: _cellAspectRatio,
-                              date: date,
-                              showBorder: widget.showBorder,
-                              startDay: widget.startDay,
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  );
-                },
-                itemCount: _totalMonths,
-              ),
+                            height: _height,
+                            controller: controller,
+                            borderColor: widget.borderColor,
+                            borderSize: widget.borderSize,
+                            cellBuilder: _cellBuilder,
+                            cellRatio: _cellAspectRatio,
+                            date: date,
+                            showBorder: widget.showBorder,
+                            startDay: widget.startDay,
+                            safeAreaOption: widget.safeAreaOption,
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                );
+              },
+              itemCount: _totalMonths,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -593,22 +590,24 @@ class _MonthPageBuilder<T> extends StatelessWidget {
   final CellTapCallback<T>? onCellTap;
   final DatePressCallback? onDateLongPress;
   final WeekDays startDay;
+  final SafeAreaOption safeAreaOption;
 
-  const _MonthPageBuilder({
-    Key? key,
-    required this.cellRatio,
-    required this.showBorder,
-    required this.borderSize,
-    required this.borderColor,
-    required this.cellBuilder,
-    required this.date,
-    required this.controller,
-    required this.width,
-    required this.height,
-    required this.onCellTap,
-    required this.onDateLongPress,
-    required this.startDay,
-  }) : super(key: key);
+  const _MonthPageBuilder(
+      {Key? key,
+      required this.cellRatio,
+      required this.showBorder,
+      required this.borderSize,
+      required this.borderColor,
+      required this.cellBuilder,
+      required this.date,
+      required this.controller,
+      required this.width,
+      required this.height,
+      required this.onCellTap,
+      required this.onDateLongPress,
+      required this.startDay,
+      required this.safeAreaOption})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -618,6 +617,7 @@ class _MonthPageBuilder<T> extends StatelessWidget {
       height: height,
       child: GridView.builder(
         physics: ClampingScrollPhysics(),
+        padding: safeAreaOption.paddingOf(context),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 7,
           childAspectRatio: cellRatio,

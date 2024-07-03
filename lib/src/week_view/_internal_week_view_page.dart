@@ -9,12 +9,7 @@ import 'package:flutter/material.dart';
 import '../../calendar_view.dart';
 import '../components/_internal_components.dart';
 import '../components/event_scroll_notifier.dart';
-import '../enumerations.dart';
-import '../event_arrangers/event_arrangers.dart';
-import '../event_controller.dart';
-import '../modals.dart';
 import '../painters.dart';
-import '../typedefs.dart';
 
 /// A single page for week view.
 class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
@@ -116,6 +111,8 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
 
   final ScrollController scrollController;
 
+  final SafeAreaOption safeAreaOption;
+
   /// A single page for week view.
   const InternalWeekViewPage({
     Key? key,
@@ -149,6 +146,7 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
     required this.fullDayEventHeightCalculator,
     required this.scrollController,
     required this.weekDetectorBuilder,
+    required this.safeAreaOption,
   }) : super(key: key);
 
   @override
@@ -263,6 +261,7 @@ class _InternalWeekViewPageState<T extends Object?>
           Expanded(
             child: SingleChildScrollView(
               controller: widget.scrollController,
+              padding: widget.safeAreaOption.paddingOf(context),
               child: SizedBox(
                 height: widget.height,
                 width: widget.width,

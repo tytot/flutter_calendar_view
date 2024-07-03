@@ -11,6 +11,7 @@ import '../event_arrangers/event_arrangers.dart';
 import '../event_controller.dart';
 import '../modals.dart';
 import '../painters.dart';
+import '../safe_area_option.dart';
 import '../typedefs.dart';
 
 /// Defines a single day page.
@@ -106,39 +107,42 @@ class InternalDayViewPage<T extends Object?> extends StatefulWidget {
 
   final ScrollController scrollController;
 
+  final SafeAreaOption safeAreaOption;
+
   /// Defines a single day page.
-  const InternalDayViewPage({
-    Key? key,
-    required this.showVerticalLine,
-    required this.width,
-    required this.date,
-    required this.eventTileBuilder,
-    required this.controller,
-    required this.subheaderHeight,
-    required this.subheaderBuilder,
-    required this.timeLineBuilder,
-    required this.hourIndicatorSettings,
-    required this.showLiveLine,
-    required this.liveTimeIndicatorSettings,
-    required this.heightPerMinute,
-    required this.timeLineWidth,
-    required this.timeLineOffset,
-    required this.height,
-    required this.hourHeight,
-    required this.eventArranger,
-    required this.verticalLineOffset,
-    required this.sections,
-    required this.onTileTap,
-    required this.onDateLongPress,
-    required this.onDateTap,
-    required this.minuteSlotSize,
-    required this.scrollNotifier,
-    required this.fullDayEventBuilder,
-    required this.scrollController,
-    required this.dayDetectorBuilder,
-    required this.showHalfHours,
-    required this.halfHourIndicatorSettings,
-  }) : super(key: key);
+  const InternalDayViewPage(
+      {Key? key,
+      required this.showVerticalLine,
+      required this.width,
+      required this.date,
+      required this.eventTileBuilder,
+      required this.controller,
+      required this.subheaderHeight,
+      required this.subheaderBuilder,
+      required this.timeLineBuilder,
+      required this.hourIndicatorSettings,
+      required this.showLiveLine,
+      required this.liveTimeIndicatorSettings,
+      required this.heightPerMinute,
+      required this.timeLineWidth,
+      required this.timeLineOffset,
+      required this.height,
+      required this.hourHeight,
+      required this.eventArranger,
+      required this.verticalLineOffset,
+      required this.sections,
+      required this.onTileTap,
+      required this.onDateLongPress,
+      required this.onDateTap,
+      required this.minuteSlotSize,
+      required this.scrollNotifier,
+      required this.fullDayEventBuilder,
+      required this.scrollController,
+      required this.dayDetectorBuilder,
+      required this.showHalfHours,
+      required this.halfHourIndicatorSettings,
+      required this.safeAreaOption})
+      : super(key: key);
 
   @override
   State<InternalDayViewPage> createState() => _InternalDayViewPageState();
@@ -203,6 +207,7 @@ class _InternalDayViewPageState<T extends Object?>
           Expanded(
             child: SingleChildScrollView(
               controller: widget.scrollController,
+              padding: widget.safeAreaOption.paddingOf(context),
               child: SizedBox(
                 height: widget.height,
                 width: widget.width,

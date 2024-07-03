@@ -11,13 +11,13 @@ import '../calendar_controller_provider.dart';
 import '../calendar_event_data.dart';
 import '../components/components.dart';
 import '../components/event_scroll_notifier.dart';
-import '../components/safe_area_wrapper.dart';
 import '../constants.dart';
 import '../enumerations.dart';
 import '../event_arrangers/event_arrangers.dart';
 import '../event_controller.dart';
 import '../extensions.dart';
 import '../modals.dart';
+import '../safe_area_option.dart';
 import '../style/header_style.dart';
 import '../typedefs.dart';
 import '_internal_week_view_page.dart';
@@ -379,83 +379,81 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeAreaWrapper(
-      option: widget.safeAreaOption,
-      child: SizedBox(
-        width: _width,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _weekHeaderBuilder(_currentStartDate, _currentEndDate),
-            Expanded(
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: widget.backgroundColor),
-                child: SizedBox(
-                  height: _height,
-                  width: _width,
-                  child: PageView.builder(
-                    physics: widget.pageViewPhysics,
-                    itemCount: _totalWeeks,
-                    controller: _pageController,
-                    onPageChanged: _onPageChange,
-                    itemBuilder: (_, index) {
-                      final dates = DateTime(_minDate.year, _minDate.month,
-                              _minDate.day + (index * DateTime.daysPerWeek))
-                          .datesOfWeek(start: widget.startDay);
+    return SizedBox(
+      width: _width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _weekHeaderBuilder(_currentStartDate, _currentEndDate),
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: widget.backgroundColor),
+              child: SizedBox(
+                height: _height,
+                width: _width,
+                child: PageView.builder(
+                  physics: widget.pageViewPhysics,
+                  itemCount: _totalWeeks,
+                  controller: _pageController,
+                  onPageChanged: _onPageChange,
+                  itemBuilder: (_, index) {
+                    final dates = DateTime(_minDate.year, _minDate.month,
+                            _minDate.day + (index * DateTime.daysPerWeek))
+                        .datesOfWeek(start: widget.startDay);
 
-                      final scrollController = ScrollController(
-                        initialScrollOffset: _lastScrollOffset,
-                      );
-                      scrollController.addListener(
-                          () => _scrollPageListener(scrollController));
-                      _scrollControllerMap[index] = scrollController;
+                    final scrollController = ScrollController(
+                      initialScrollOffset: _lastScrollOffset,
+                    );
+                    scrollController.addListener(
+                        () => _scrollPageListener(scrollController));
+                    _scrollControllerMap[index] = scrollController;
 
-                      return ValueListenableBuilder(
-                        valueListenable: _scrollConfiguration,
-                        builder: (_, __, ___) => InternalWeekViewPage<T>(
-                          key: ValueKey(
-                              _hourHeight.toString() + dates[0].toString()),
-                          height: _height,
-                          width: _width,
-                          weekTitleWidth: _weekTitleWidth,
-                          weekTitleHeight: widget.weekTitleHeight,
-                          weekDayBuilder: _weekDayBuilder,
-                          weekNumberBuilder: _weekNumberBuilder,
-                          weekDetectorBuilder: _weekDetectorBuilder,
-                          liveTimeIndicatorSettings: _liveTimeIndicatorSettings,
-                          timeLineBuilder: _timeLineBuilder,
-                          onTileTap: widget.onEventTap,
-                          onDateLongPress: widget.onDateLongPress,
-                          onDateTap: widget.onDateTap,
-                          eventTileBuilder: _eventTileBuilder,
-                          heightPerMinute: widget.heightPerMinute,
-                          hourIndicatorSettings: _hourIndicatorSettings,
-                          dates: dates,
-                          showLiveLine: _showLiveTimeIndicator(dates),
-                          timeLineOffset: widget.timeLineOffset,
-                          timeLineWidth: _timeLineWidth,
-                          verticalLineOffset: 0,
-                          showVerticalLine: true,
-                          controller: controller,
-                          hourHeight: _hourHeight,
-                          scrollController: scrollController,
-                          eventArranger: _eventArranger,
-                          weekDays: _weekDays,
-                          minuteSlotSize: widget.minuteSlotSize,
-                          scrollConfiguration: _scrollConfiguration,
-                          fullDayEventBuilder: _fullDayEventBuilder,
-                          fullDayEventHeightCalculator:
-                              widget.fullDayEventHeightCalculator ?? (_) => 24,
-                        ),
-                      );
-                    },
-                  ),
+                    return ValueListenableBuilder(
+                      valueListenable: _scrollConfiguration,
+                      builder: (_, __, ___) => InternalWeekViewPage<T>(
+                        key: ValueKey(
+                            _hourHeight.toString() + dates[0].toString()),
+                        height: _height,
+                        width: _width,
+                        weekTitleWidth: _weekTitleWidth,
+                        weekTitleHeight: widget.weekTitleHeight,
+                        weekDayBuilder: _weekDayBuilder,
+                        weekNumberBuilder: _weekNumberBuilder,
+                        weekDetectorBuilder: _weekDetectorBuilder,
+                        liveTimeIndicatorSettings: _liveTimeIndicatorSettings,
+                        timeLineBuilder: _timeLineBuilder,
+                        onTileTap: widget.onEventTap,
+                        onDateLongPress: widget.onDateLongPress,
+                        onDateTap: widget.onDateTap,
+                        eventTileBuilder: _eventTileBuilder,
+                        heightPerMinute: widget.heightPerMinute,
+                        hourIndicatorSettings: _hourIndicatorSettings,
+                        dates: dates,
+                        showLiveLine: _showLiveTimeIndicator(dates),
+                        timeLineOffset: widget.timeLineOffset,
+                        timeLineWidth: _timeLineWidth,
+                        verticalLineOffset: 0,
+                        showVerticalLine: true,
+                        controller: controller,
+                        hourHeight: _hourHeight,
+                        scrollController: scrollController,
+                        eventArranger: _eventArranger,
+                        weekDays: _weekDays,
+                        minuteSlotSize: widget.minuteSlotSize,
+                        scrollConfiguration: _scrollConfiguration,
+                        fullDayEventBuilder: _fullDayEventBuilder,
+                        fullDayEventHeightCalculator:
+                            widget.fullDayEventHeightCalculator ?? (_) => 24,
+                        safeAreaOption: widget.safeAreaOption,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

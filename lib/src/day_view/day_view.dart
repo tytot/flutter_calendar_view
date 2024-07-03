@@ -12,13 +12,13 @@ import '../calendar_controller_provider.dart';
 import '../calendar_event_data.dart';
 import '../components/day_view_components.dart';
 import '../components/event_scroll_notifier.dart';
-import '../components/safe_area_wrapper.dart';
 import '../constants.dart';
 import '../enumerations.dart';
 import '../event_arrangers/event_arrangers.dart';
 import '../event_controller.dart';
 import '../extensions.dart';
 import '../modals.dart';
+import '../safe_area_option.dart';
 import '../style/header_style.dart';
 import '../typedefs.dart';
 import '_internal_day_view_page.dart';
@@ -371,81 +371,78 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeAreaWrapper(
-      option: widget.safeAreaOption,
-      child: SizedBox(
-        width: _width,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _dayTitleBuilder(_currentDate),
-            Expanded(
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: widget.backgroundColor),
-                child: SizedBox(
-                  height: _height,
-                  child: PageView.builder(
-                    physics: widget.pageViewPhysics,
-                    itemCount: _totalDays,
-                    controller: _pageController,
-                    onPageChanged: _onPageChange,
-                    itemBuilder: (_, index) {
-                      final date = DateTime(
-                          _minDate.year, _minDate.month, _minDate.day + index);
+    return SizedBox(
+      width: _width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _dayTitleBuilder(_currentDate),
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: widget.backgroundColor),
+              child: SizedBox(
+                height: _height,
+                child: PageView.builder(
+                  physics: widget.pageViewPhysics,
+                  itemCount: _totalDays,
+                  controller: _pageController,
+                  onPageChanged: _onPageChange,
+                  itemBuilder: (_, index) {
+                    final date = DateTime(
+                        _minDate.year, _minDate.month, _minDate.day + index);
 
-                      final scrollController = ScrollController(
-                        initialScrollOffset: _lastScrollOffset,
-                      );
-                      scrollController.addListener(
-                          () => _scrollPageListener(scrollController));
-                      _scrollControllerMap[index] = scrollController;
+                    final scrollController = ScrollController(
+                      initialScrollOffset: _lastScrollOffset,
+                    );
+                    scrollController.addListener(
+                        () => _scrollPageListener(scrollController));
+                    _scrollControllerMap[index] = scrollController;
 
-                      return ValueListenableBuilder(
-                        valueListenable: _scrollConfiguration,
-                        builder: (_, __, ___) => InternalDayViewPage<T>(
-                          key: ValueKey(
-                              _hourHeight.toString() + date.toString()),
-                          width: _width,
-                          liveTimeIndicatorSettings: _liveTimeIndicatorSettings,
-                          timeLineBuilder: _timeLineBuilder,
-                          dayDetectorBuilder: _dayDetectorBuilder,
-                          eventTileBuilder: _eventTileBuilder,
-                          heightPerMinute: widget.heightPerMinute,
-                          hourIndicatorSettings: _hourIndicatorSettings,
-                          date: date,
-                          onTileTap: widget.onEventTap,
-                          onDateLongPress: widget.onDateLongPress,
-                          onDateTap: widget.onDateTap,
-                          showLiveLine: widget.showLiveTimeLineInAllDays ||
-                              date.compareWithoutTime(DateTime.now()),
-                          timeLineOffset: widget.timeLineOffset,
-                          timeLineWidth: _timeLineWidth,
-                          verticalLineOffset: widget.verticalLineOffset,
-                          showVerticalLine: widget.showVerticalLine,
-                          subheaderHeight: widget.subheaderHeight ?? 0,
-                          subheaderBuilder: widget.subheaderBuilder ??
-                              (_) => const SizedBox.shrink(),
-                          sections: widget.sections,
-                          height: _height,
-                          controller: controller,
-                          hourHeight: _hourHeight,
-                          eventArranger: _eventArranger,
-                          minuteSlotSize: widget.minuteSlotSize,
-                          scrollNotifier: _scrollConfiguration,
-                          fullDayEventBuilder: _fullDayEventBuilder,
-                          scrollController: scrollController,
-                          showHalfHours: widget.showHalfHours,
-                          halfHourIndicatorSettings: _halfHourIndicatorSettings,
-                        ),
-                      );
-                    },
-                  ),
+                    return ValueListenableBuilder(
+                      valueListenable: _scrollConfiguration,
+                      builder: (_, __, ___) => InternalDayViewPage<T>(
+                        key: ValueKey(_hourHeight.toString() + date.toString()),
+                        width: _width,
+                        liveTimeIndicatorSettings: _liveTimeIndicatorSettings,
+                        timeLineBuilder: _timeLineBuilder,
+                        dayDetectorBuilder: _dayDetectorBuilder,
+                        eventTileBuilder: _eventTileBuilder,
+                        heightPerMinute: widget.heightPerMinute,
+                        hourIndicatorSettings: _hourIndicatorSettings,
+                        date: date,
+                        onTileTap: widget.onEventTap,
+                        onDateLongPress: widget.onDateLongPress,
+                        onDateTap: widget.onDateTap,
+                        showLiveLine: widget.showLiveTimeLineInAllDays ||
+                            date.compareWithoutTime(DateTime.now()),
+                        timeLineOffset: widget.timeLineOffset,
+                        timeLineWidth: _timeLineWidth,
+                        verticalLineOffset: widget.verticalLineOffset,
+                        showVerticalLine: widget.showVerticalLine,
+                        subheaderHeight: widget.subheaderHeight ?? 0,
+                        subheaderBuilder: widget.subheaderBuilder ??
+                            (_) => const SizedBox.shrink(),
+                        sections: widget.sections,
+                        height: _height,
+                        controller: controller,
+                        hourHeight: _hourHeight,
+                        eventArranger: _eventArranger,
+                        minuteSlotSize: widget.minuteSlotSize,
+                        scrollNotifier: _scrollConfiguration,
+                        fullDayEventBuilder: _fullDayEventBuilder,
+                        scrollController: scrollController,
+                        showHalfHours: widget.showHalfHours,
+                        halfHourIndicatorSettings: _halfHourIndicatorSettings,
+                        safeAreaOption: widget.safeAreaOption,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
