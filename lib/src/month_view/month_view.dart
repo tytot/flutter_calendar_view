@@ -324,7 +324,10 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
                         final _cellAspectRatio =
                             widget.useAvailableVerticalSpace
                                 ? calculateCellAspectRatio(
-                                    constraints.maxHeight,
+                                    constraints.maxHeight -
+                                        widget.safeAreaOption
+                                            .paddingOf(context)
+                                            .vertical,
                                   )
                                 : widget.cellAspectRatio;
 

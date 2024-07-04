@@ -21,6 +21,8 @@ class HourLinePainter extends CustomPainter {
   /// Height occupied by one minute of time stamp.
   final double minuteHeight;
 
+  final bool showBottomLine;
+
   /// Flag to display vertical line at left or not.
   final bool showVerticalLine;
 
@@ -44,6 +46,7 @@ class HourLinePainter extends CustomPainter {
     required this.lineHeight,
     required this.minuteHeight,
     required this.offset,
+    required this.showBottomLine,
     required this.showVerticalLine,
     this.verticalLineOffset = 10,
     this.sections = 1,
@@ -58,7 +61,9 @@ class HourLinePainter extends CustomPainter {
       ..color = lineColor
       ..strokeWidth = lineHeight;
 
-    for (var i = 1; i < Constants.hoursADay; i++) {
+    final maxHour =
+        showBottomLine ? Constants.hoursADay : Constants.hoursADay - 1;
+    for (var i = 1; i <= maxHour; i++) {
       final dy = i * minuteHeight * 60;
       if (lineStyle == LineStyle.dashed) {
         var startX = offset;

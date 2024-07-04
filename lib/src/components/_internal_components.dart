@@ -123,6 +123,8 @@ class TimeLine extends StatelessWidget {
   /// This will display time string in timeline.
   final DateWidgetBuilder timeLineBuilder;
 
+  final bool showLastHour;
+
   /// Flag to display half hours.
   final bool showHalfHours;
 
@@ -138,11 +140,15 @@ class TimeLine extends StatelessWidget {
     required this.height,
     required this.timeLineOffset,
     required this.timeLineBuilder,
+    required this.showLastHour,
     this.showHalfHours = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final maxHour =
+        showLastHour ? Constants.hoursADay : Constants.hoursADay - 1;
+
     return ConstrainedBox(
       key: ValueKey(hourHeight),
       constraints: BoxConstraints(
@@ -152,8 +158,9 @@ class TimeLine extends StatelessWidget {
         minHeight: height,
       ),
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          for (int i = 1; i < Constants.hoursADay; i++)
+          for (int i = 1; i <= maxHour; i++)
             _timelinePositioned(
               topPosition: hourHeight * i - timeLineOffset,
               bottomPosition: height - (hourHeight * (i + 1)) + timeLineOffset,

@@ -160,6 +160,8 @@ class _InternalDayViewPageState<T extends Object?>
   Widget build(BuildContext context) {
     final fullDayEvents = widget.controller.getFullDayEvents(widget.date);
 
+    final bottomPadding = widget.safeAreaOption.paddingOf(context).bottom;
+
     return Container(
       height: widget.height + widget.subheaderHeight,
       width: widget.width,
@@ -220,21 +222,22 @@ class _InternalDayViewPageState<T extends Object?>
                               color: widget.hourIndicatorSettings.color),
                         )),
                         child: CustomPaint(
-                          size: Size(widget.width, widget.height),
+                          size:
+                              Size(widget.width, widget.height + bottomPadding),
                           painter: HourLinePainter(
-                            lineColor: widget.hourIndicatorSettings.color,
-                            lineHeight: widget.hourIndicatorSettings.height,
-                            offset: widget.timeLineWidth +
-                                widget.hourIndicatorSettings.offset,
-                            minuteHeight: widget.heightPerMinute,
-                            verticalLineOffset: widget.verticalLineOffset,
-                            showVerticalLine: widget.showVerticalLine,
-                            sections: widget.sections,
-                            lineStyle: widget.hourIndicatorSettings.lineStyle,
-                            dashWidth: widget.hourIndicatorSettings.dashWidth,
-                            dashSpaceWidth:
-                                widget.hourIndicatorSettings.dashSpaceWidth,
-                          ),
+                              lineColor: widget.hourIndicatorSettings.color,
+                              lineHeight: widget.hourIndicatorSettings.height,
+                              offset: widget.timeLineWidth +
+                                  widget.hourIndicatorSettings.offset,
+                              minuteHeight: widget.heightPerMinute,
+                              verticalLineOffset: widget.verticalLineOffset,
+                              showVerticalLine: widget.showVerticalLine,
+                              sections: widget.sections,
+                              lineStyle: widget.hourIndicatorSettings.lineStyle,
+                              dashWidth: widget.hourIndicatorSettings.dashWidth,
+                              dashSpaceWidth:
+                                  widget.hourIndicatorSettings.dashSpaceWidth,
+                              showBottomLine: bottomPadding > 0),
                         )),
                     if (widget.showHalfHours)
                       CustomPaint(
@@ -281,6 +284,7 @@ class _InternalDayViewPageState<T extends Object?>
                       timeLineBuilder: widget.timeLineBuilder,
                       timeLineOffset: widget.timeLineOffset,
                       timeLineWidth: widget.timeLineWidth,
+                      showLastHour: bottomPadding > 0,
                       showHalfHours: widget.showHalfHours,
                       key: ValueKey(widget.heightPerMinute),
                     ),

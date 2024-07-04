@@ -168,6 +168,8 @@ class _InternalWeekViewPageState<T extends Object?>
         .map((date) => widget.controller.getFullDayEvents(date).length)
         .reduce(max);
 
+    final bottomPadding = widget.safeAreaOption.paddingOf(context).bottom;
+
     return Container(
       height: widget.height + widget.weekTitleHeight,
       width: widget.width,
@@ -268,16 +270,16 @@ class _InternalWeekViewPageState<T extends Object?>
                 child: Stack(
                   children: [
                     CustomPaint(
-                      size: Size(widget.width, widget.height),
+                      size: Size(widget.width, widget.height + bottomPadding),
                       painter: HourLinePainter(
-                        lineColor: widget.hourIndicatorSettings.color,
-                        lineHeight: widget.hourIndicatorSettings.height,
-                        offset: widget.timeLineWidth +
-                            widget.hourIndicatorSettings.offset,
-                        minuteHeight: widget.heightPerMinute,
-                        verticalLineOffset: widget.verticalLineOffset,
-                        showVerticalLine: widget.showVerticalLine,
-                      ),
+                          lineColor: widget.hourIndicatorSettings.color,
+                          lineHeight: widget.hourIndicatorSettings.height,
+                          offset: widget.timeLineWidth +
+                              widget.hourIndicatorSettings.offset,
+                          minuteHeight: widget.heightPerMinute,
+                          verticalLineOffset: widget.verticalLineOffset,
+                          showVerticalLine: widget.showVerticalLine,
+                          showBottomLine: bottomPadding > 0),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
@@ -336,6 +338,7 @@ class _InternalWeekViewPageState<T extends Object?>
                       height: widget.height,
                       timeLineOffset: widget.timeLineOffset,
                       timeLineBuilder: widget.timeLineBuilder,
+                      showLastHour: bottomPadding > 0,
                     ),
                     if (widget.showLiveLine &&
                         widget.liveTimeIndicatorSettings.height > 0)
