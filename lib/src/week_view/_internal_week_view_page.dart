@@ -109,6 +109,10 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
 
   final double Function(int) fullDayEventHeightCalculator;
 
+  final bool showHalfHours;
+
+  final HourIndicatorSettings halfHourIndicatorSettings;
+
   final ScrollController scrollController;
 
   final SafeAreaOption safeAreaOption;
@@ -146,6 +150,8 @@ class InternalWeekViewPage<T extends Object?> extends StatefulWidget {
     required this.fullDayEventHeightCalculator,
     required this.scrollController,
     required this.weekDetectorBuilder,
+    required this.showHalfHours,
+    required this.halfHourIndicatorSettings,
     required this.safeAreaOption,
   }) : super(key: key);
 
@@ -281,6 +287,21 @@ class _InternalWeekViewPageState<T extends Object?>
                           showVerticalLine: widget.showVerticalLine,
                           showBottomLine: bottomPadding > 0),
                     ),
+                    if (widget.showHalfHours)
+                      CustomPaint(
+                        size: Size(widget.width, widget.height),
+                        painter: HalfHourLinePainter(
+                          lineColor: widget.halfHourIndicatorSettings.color,
+                          lineHeight: widget.halfHourIndicatorSettings.height,
+                          offset: widget.timeLineWidth +
+                              widget.halfHourIndicatorSettings.offset,
+                          minuteHeight: widget.heightPerMinute,
+                          lineStyle: widget.halfHourIndicatorSettings.lineStyle,
+                          dashWidth: widget.halfHourIndicatorSettings.dashWidth,
+                          dashSpaceWidth:
+                              widget.halfHourIndicatorSettings.dashSpaceWidth,
+                        ),
+                      ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: SizedBox(

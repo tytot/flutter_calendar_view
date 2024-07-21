@@ -166,15 +166,15 @@ class TimeLine extends StatelessWidget {
               bottomPosition: height - (hourHeight * (i + 1)) + timeLineOffset,
               hour: i,
             ),
-          if (showHalfHours)
-            for (int i = 0; i < Constants.hoursADay; i++)
-              _timelinePositioned(
-                topPosition: hourHeight * i - timeLineOffset + _halfHourHeight,
-                bottomPosition:
-                    height - (hourHeight * (i + 1)) + timeLineOffset,
-                hour: i,
-                minutes: 30,
-              ),
+          // if (showHalfHours)
+          //   for (int i = 0; i < Constants.hoursADay; i++)
+          //     _timelinePositioned(
+          //       topPosition: hourHeight * i - timeLineOffset + _halfHourHeight,
+          //       bottomPosition:
+          //           height - (hourHeight * (i + 1)) + timeLineOffset,
+          //       hour: i,
+          //       minutes: 30,
+          //     ),
         ],
       ),
     );

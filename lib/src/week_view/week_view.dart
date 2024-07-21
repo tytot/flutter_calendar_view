@@ -90,6 +90,8 @@ class WeekView<T extends Object?> extends StatefulWidget {
   /// Settings for live time indicator settings.
   final HourIndicatorSettings? liveTimeIndicatorSettings;
 
+  final HourIndicatorSettings? halfHourIndicatorSettings;
+
   /// duration for page transition while changing the week.
   final Duration pageTransitionDuration;
 
@@ -189,6 +191,8 @@ class WeekView<T extends Object?> extends StatefulWidget {
 
   final double Function(int)? fullDayEventHeightCalculator;
 
+  final bool showHalfHours;
+
   /// Main widget for week view.
   const WeekView(
       {Key? key,
@@ -231,7 +235,9 @@ class WeekView<T extends Object?> extends StatefulWidget {
       this.safeAreaOption = const SafeAreaOption(),
       this.pageViewPhysics,
       this.fullDayEventBuilder,
-      this.fullDayEventHeightCalculator})
+      this.fullDayEventHeightCalculator,
+      this.showHalfHours = false,
+      this.halfHourIndicatorSettings})
       : assert((timeLineOffset) >= 0,
             "timeLineOffset must be greater than or equal to 0"),
         assert(width == null || width > 0,
@@ -267,6 +273,7 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
   late EventArranger<T> _eventArranger;
 
   late HourIndicatorSettings _hourIndicatorSettings;
+  late HourIndicatorSettings _halfHourIndicatorSettings;
   late HourIndicatorSettings _liveTimeIndicatorSettings;
 
   late PageController _pageController;
@@ -445,6 +452,8 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
                         fullDayEventBuilder: _fullDayEventBuilder,
                         fullDayEventHeightCalculator:
                             widget.fullDayEventHeightCalculator ?? (_) => 24,
+                        showHalfHours: widget.showHalfHours,
+                        halfHourIndicatorSettings: _halfHourIndicatorSettings,
                         safeAreaOption: widget.safeAreaOption,
                       ),
                     );
@@ -519,6 +528,16 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
 
     assert(_hourIndicatorSettings.height < _hourHeight,
         "hourIndicator height must be less than minuteHeight * 60");
+
+    _halfHourIndicatorSettings = widget.halfHourIndicatorSettings ??
+        HourIndicatorSettings(
+          height: widget.heightPerMinute,
+          color: Constants.defaultBorderColor,
+          offset: 5,
+        );
+
+    assert(_halfHourIndicatorSettings.height < _hourHeight,
+        "halfHourIndicator height must be less than minuteHeight * 60");
 
     _weekTitleWidth =
         (_width - _timeLineWidth - _hourIndicatorSettings.offset - 0.5) /
