@@ -270,6 +270,8 @@ class _InternalWeekViewPageState<T extends Object?>
             child: SingleChildScrollView(
               controller: widget.scrollController,
               padding: widget.safeAreaOption.paddingOf(context),
+              physics: const ClampingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics()),
               child: SizedBox(
                 height: widget.height,
                 width: widget.width,
