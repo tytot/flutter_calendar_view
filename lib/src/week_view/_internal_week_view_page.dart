@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../calendar_view.dart';
 import '../components/_internal_components.dart';
 import '../components/event_scroll_notifier.dart';
+import '../components/stretching_scroll_behavior.dart';
 import '../painters.dart';
 
 /// A single page for week view.
@@ -267,8 +268,8 @@ class _InternalWeekViewPageState<T extends Object?>
               ),
             ),
           Expanded(
-            child: StretchingOverscrollIndicator(
-              axisDirection: AxisDirection.down,
+            child: ScrollConfiguration(
+              behavior: StretchingScrollBehavior(),
               child: SingleChildScrollView(
                 controller: widget.scrollController,
                 padding: widget.safeAreaOption.paddingOf(context),
